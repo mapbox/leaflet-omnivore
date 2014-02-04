@@ -1,0 +1,35 @@
+{
+  "name": "leaflet-omnivore",
+  "version": "0.0.0",
+  "description": "a geospatial format parser for Leaflet",
+  "main": "index.js",
+  "scripts": {
+    "test": "tap"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:mapbox/leaflet-omnivore.git"
+  },
+  "keywords": [
+    "leaflet",
+    "formats",
+    "kml",
+    "csv",
+    "gpx"
+  ],
+  "author": "Tom MacWright",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/mapbox/leaflet-omnivore/issues"
+  },
+  "homepage": "https://github.com/mapbox/leaflet-omnivore",
+  "dependencies": {
+    "csv2geojson": "~3.6.1",
+    "togeojson": "~0.5.0",
+    "corslite": "0.0.5"
+  },
+  "devDependencies": {
+    "browserify": "~3.24.11",
+    "brfs": "0.0.9"
+  }
+}
