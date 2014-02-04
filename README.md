@@ -16,3 +16,4 @@ omnivore.csv('a.csv').addTo(map);
 * `.kml.parse(csvString)`: Parse KML, and return layer.
 * `.gpx(url)`: Load GPX file at URL, parse GPX, and return layer.
 * `.gpx.parse(csvString)`: Parse GPX, and return layer.
+* `.geojson(url)`: Load GeoJSON file at URL, parse GeoJSON, and return layer.

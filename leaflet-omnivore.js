@@ -3,6 +3,8 @@ var xhr = _dereq_('corslite'),
     csv2geojson = _dereq_('csv2geojson'),
     toGeoJSON = _dereq_('togeojson');
 
+module.exports.geojson = geojsonLoad;
+
 module.exports.csv = csvLoad;
 module.exports.csv.parse = csvParse;
 
@@ -11,6 +13,15 @@ module.exports.gpx.parse = gpxParse;
 
 module.exports.kml = kmlLoad;
 module.exports.kml.parse = kmlParse;
+
+function geojsonLoad(url, options) {
+    var layer = L.geoJson();
+    xhr(url, function(err, response) {
+        if (err) return;
+        layer.addData(JSON.parse(response.responseText));
+    });
+    return layer;
+}
 
 function csvLoad(url, options) {
     var layer = L.geoJson();
