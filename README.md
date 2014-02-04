@@ -1,13 +1,17 @@
 # leaflet-omnivore
 
-Multi-format support for [Leaflet](http://leafletjs.com/).
+[Leaflet](http://leafletjs.com/) supports the [GeoJSON](http://geojson.org/) format
+by default. What if you have something else? That's where omnivore comes in.
 
-Currently supports:
+It currently supports:
 
 * [CSV](http://en.wikipedia.org/wiki/Comma-separated_values) (via [csv2geojson](https://github.com/mapbox/csv2geojson))
 * GPX (via [toGeoJSON](https://github.com/mapbox/togeojson))
 * [KML](http://developers.google.com/kml/documentation/) (via [toGeoJSON](https://github.com/mapbox/togeojson))
 * [WKT](http://en.wikipedia.org/wiki/Well-known_text) (via [wellknown](https://github.com/mapbox/wellknown))
+
+Omnivore also includes an AJAX library, [corslite](https://github.com/mapbox/corslite),
+so you can specify what you want to add to the map with just a URL.
 
 ## example
 
@@ -33,3 +37,14 @@ omnivore.geojson('a.geojson').addTo(map);
 * `.geojson(url)`: Load GeoJSON file at URL, parse GeoJSON, and return layer.
 * `.wkt(url)`: Load & parse WKT, and return layer.
 * `.wkt.parse(wktString)`: Parse WKT, and return layer.
+
+## FAQ
+
+* **What if I just want one format?** Lucky for you, each format is specified
+  in a different module, so you can just use csv2geojson, wellknown, or toGeoJSON
+  individually.
+* **My AJAX request is failing for a cross-domain request**. Read up on the [Same Origin Restriction](http://en.wikipedia.org/wiki/Same-origin_policy).
+  By default, we use corslite, so cross-domain requests will try to use [CORS](http://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
+  if your server and browser supports it, but if one of them doesn't, there's no
+  way on the internet to support your request.
+* **Why isn't JSONP supported?** [Here's why](https://gist.github.com/tmcw/6244497).
