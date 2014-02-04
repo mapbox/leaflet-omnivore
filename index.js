@@ -1,9 +1,13 @@
 var xhr = require('corslite'),
     csv2geojson = require('csv2geojson'),
     wellknown = require('wellknown'),
+    topojson = require('topojson'),
     toGeoJSON = require('togeojson');
 
 module.exports.geojson = geojsonLoad;
+
+module.exports.topojson = topojsonLoad;
+module.exports.topojson.parse = topojsonParse;
 
 module.exports.csv = csvLoad;
 module.exports.csv.parse = csvParse;
@@ -24,6 +28,27 @@ function geojsonLoad(url, options) {
         layer.addData(JSON.parse(response.responseText));
     });
     return layer;
+}
+
+function topojsonLoad(url, options) {
+    var layer = L.geoJson();
+    xhr(url, function(err, response) {
+        if (err) return;
+        layer.addData(topojsonParse(response.responseText));
+    });
+    return layer;
+}
+
+function topojsonParse(data) {
+    var o = typeof data === 'string' ?
+        JSON.parse(data) : data;
+    var features = [];
+    for (var i in o.objects) {
+        var ft = topojson.feature(o, o.objects[i]);
+        if (ft.features) features = features.concat(ft.features);
+        else features = features.concat([ft]);
+    }
+    return features;
 }
 
 function csvLoad(url, options) {
