@@ -57,11 +57,19 @@ function topojsonParse(data) {
 function csvLoad(url, options) {
     var layer = L.geoJson();
     xhr(url, function(err, response) {
-        if (err) return layer.fire('error', {
-            error: err
-        });
+        var error;
+        if (err) {
+            return layer.fire('error', {
+                error: err
+            });
+        }
+        function avoidReady() {
+            error = true;
+        }
+        layer.on('error', avoidReady);
         csvParse(response.responseText, options, layer);
-        layer.fire('ready');
+        layer.off('error', avoidReady);
+        if (!error) layer.fire('ready');
     });
     return layer;
 }
@@ -73,7 +81,6 @@ function csvParse(csv, options, layer) {
             error: err
         });
         layer.addData(geojson);
-        layer.fire('ready');
     });
     return layer;
 }
