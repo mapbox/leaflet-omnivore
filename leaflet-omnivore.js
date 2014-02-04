@@ -1,6 +1,7 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var o;"undefined"!=typeof window?o=window:"undefined"!=typeof global?o=global:"undefined"!=typeof self&&(o=self),o.omnivore=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 var xhr = _dereq_('corslite'),
     csv2geojson = _dereq_('csv2geojson'),
+    wellknown = _dereq_('wellknown'),
     toGeoJSON = _dereq_('togeojson');
 
 module.exports.geojson = geojsonLoad;
@@ -13,6 +14,9 @@ module.exports.gpx.parse = gpxParse;
 
 module.exports.kml = kmlLoad;
 module.exports.kml.parse = kmlParse;
+
+module.exports.wkt = wktLoad;
+module.exports.wkt.parse = wktParse;
 
 function geojsonLoad(url, options) {
     var layer = L.geoJson();
@@ -77,6 +81,22 @@ function kmlParse(gpx, options, layer) {
     return layer;
 }
 
+function wktLoad(url, options) {
+    var layer = L.geoJson();
+    xhr(url, function(err, response) {
+        if (err) return;
+        wktParse(response.responseText, options, layer);
+    });
+    return layer;
+}
+
+function wktParse(wkt, options, layer) {
+    layer = layer || L.geoJson();
+    var geojson = wellknown(wkt);
+    layer.addData(geojson);
+    return layer;
+}
+
 function getXML(response) {
     try {
         return response.responseXML || (new DOMParser()).parseFromString(response.responseText, 'text/xml');
@@ -85,7 +105,7 @@ function getXML(response) {
     }
 }
 
-},{"corslite":5,"csv2geojson":6,"togeojson":9}],2:[function(_dereq_,module,exports){
+},{"corslite":5,"csv2geojson":6,"togeojson":9,"wellknown":10}],2:[function(_dereq_,module,exports){
 
 },{}],3:[function(_dereq_,module,exports){
 module.exports=_dereq_(2)
@@ -689,6 +709,171 @@ module.exports = function(x, dims) {
 
 if (typeof module !== 'undefined') module.exports = toGeoJSON;
 }).call(this,_dereq_("/Users/tmcw/src/leaflet-omnivore/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/Users/tmcw/src/leaflet-omnivore/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":4,"xmldom":3}]},{},[1])
+},{"/Users/tmcw/src/leaflet-omnivore/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":4,"xmldom":3}],10:[function(_dereq_,module,exports){
+module.exports = parse;
+
+/*
+ * Parse WKT and return GeoJSON.
+ *
+ * @param {string} _ A WKT geometry
+ * @return {?Object} A GeoJSON geometry object
+ */
+function parse(_) {
+
+    var i = 0;
+
+    function $(re) {
+        var match = _.substring(i).match(re);
+        if (!match) return null;
+        else {
+            i += match[0].length;
+            return match[0];
+        }
+    }
+
+    function white() { $(/^\s*/); }
+
+    function multicoords() {
+        white();
+        var depth = 0, rings = [],
+            pointer = rings, elem;
+        while (elem =
+            $(/^(\()/) ||
+            $(/^(\))/) ||
+            $(/^(\,)/) ||
+            coords()) {
+            if (elem == '(') {
+                depth++;
+            } else if (elem == ')') {
+                depth--;
+                if (depth == 0) break;
+            } else if (elem && Array.isArray(elem) && elem.length) {
+                pointer.push(elem);
+            } else if (elem === ',') {
+            }
+            white();
+        }
+        if (depth !== 0) return null;
+        return rings;
+    }
+
+    function coords() {
+        var list = [], item, pt;
+        while (pt =
+            $(/^[-+]?([0-9]*\.[0-9]+|[0-9]+)/) ||
+            $(/^(\,)/)) {
+            if (pt == ',') {
+                list.push(item);
+                item = [];
+            } else {
+                if (!item) item = [];
+                item.push(parseFloat(pt));
+            }
+            white();
+        }
+        if (item) list.push(item);
+        return list.length ? list : null;
+    }
+
+    function point() {
+        if (!$(/^(point)/i)) return null;
+        white();
+        if (!$(/^(\()/)) return null;
+        var c = coords();
+        white();
+        if (!$(/^(\))/)) return null;
+        return {
+            type: 'Point',
+            coordinates: c[0]
+        };
+    }
+
+    function multipoint() {
+        if (!$(/^(multipoint)/i)) return null;
+        white();
+        var c = multicoords();
+        white();
+        return {
+            type: 'MultiPoint',
+            coordinates: c[0]
+        };
+    }
+
+    function multilinestring() {
+        if (!$(/^(multilinestring)/i)) return null;
+        white();
+        var c = multicoords();
+        white();
+        return {
+            type: 'MultiLineString',
+            coordinates: c
+        };
+    }
+
+    function linestring() {
+        if (!$(/^(linestring)/i)) return null;
+        white();
+        if (!$(/^(\()/)) return null;
+        var c = coords();
+        if (!$(/^(\))/)) return null;
+        return {
+            type: 'LineString',
+            coordinates: c
+        };
+    }
+
+    function polygon() {
+        if (!$(/^(polygon)/i)) return null;
+        white();
+        return {
+            type: 'Polygon',
+            coordinates: multicoords()
+        };
+    }
+
+    function multipolygon() {
+        if (!$(/^(multipolygon)/i)) return null;
+        white();
+        return {
+            type: 'MultiPolygon',
+            coordinates: multicoords()
+        };
+    }
+
+    function geometrycollection() {
+        var geometries = [], geometry;
+
+        if (!$(/^(geometrycollection)/i)) return null;
+        white();
+
+        if (!$(/^(\()/)) return null;
+        while (geometry = root()) {
+            geometries.push(geometry);
+            white();
+            $(/^(\,)/);
+            white();
+        }
+        if (!$(/^(\))/)) return null;
+
+        return {
+            type: 'GeometryCollection',
+            geometries: geometries
+        };
+    }
+
+    function root() {
+        return point() ||
+            linestring() ||
+            polygon() ||
+            multipoint() ||
+            multilinestring() ||
+            multipolygon() ||
+            geometrycollection();
+    }
+
+    return root();
+}
+
+},{}]},{},[1])
 (1)
 });

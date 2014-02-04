@@ -1,5 +1,6 @@
 var xhr = require('corslite'),
     csv2geojson = require('csv2geojson'),
+    wellknown = require('wellknown'),
     toGeoJSON = require('togeojson');
 
 module.exports.geojson = geojsonLoad;
@@ -12,6 +13,9 @@ module.exports.gpx.parse = gpxParse;
 
 module.exports.kml = kmlLoad;
 module.exports.kml.parse = kmlParse;
+
+module.exports.wkt = wktLoad;
+module.exports.wkt.parse = wktParse;
 
 function geojsonLoad(url, options) {
     var layer = L.geoJson();
@@ -72,6 +76,22 @@ function kmlLoad(url, options) {
 function kmlParse(gpx, options, layer) {
     layer = layer || L.geoJson();
     var geojson = toGeoJSON.kml(gpx);
+    layer.addData(geojson);
+    return layer;
+}
+
+function wktLoad(url, options) {
+    var layer = L.geoJson();
+    xhr(url, function(err, response) {
+        if (err) return;
+        wktParse(response.responseText, options, layer);
+    });
+    return layer;
+}
+
+function wktParse(wkt, options, layer) {
+    layer = layer || L.geoJson();
+    var geojson = wellknown(wkt);
     layer.addData(geojson);
     return layer;
 }

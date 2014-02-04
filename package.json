@@ -26,7 +26,8 @@
   "dependencies": {
     "csv2geojson": "~3.6.1",
     "togeojson": "~0.5.0",
-    "corslite": "0.0.5"
+    "corslite": "0.0.5",
+    "wellknown": "~0.1.2"
   },
   "devDependencies": {
     "browserify": "~3.24.11",
