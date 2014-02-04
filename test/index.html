@@ -18,10 +18,18 @@
 var map = L.mapbox.map('map', 'examples.map-9ijuk24y')
     .setView([38, -102.0], 5);
 
+function log(_) {
+    if (typeof console == 'object') console.log(_);
+}
+
 omnivore.csv('a.csv').addTo(map);
 omnivore.gpx('a.gpx').addTo(map);
 omnivore.kml('a.kml').addTo(map);
-omnivore.geojson('a.geojson').addTo(map);
+omnivore.geojson('a.geojson')
+    .on('ready', function() {
+        log('geojson loaded');
+    })
+    .addTo(map);
 omnivore.topojson('a.topojson').addTo(map);
 omnivore.wkt('a.wkt').addTo(map);
 </script>

@@ -27,6 +27,7 @@ function geojsonLoad(url, options) {
     xhr(url, function(err, response) {
         if (err) return;
         layer.addData(JSON.parse(response.responseText));
+        layer.fire('ready');
     });
     return layer;
 }
@@ -36,6 +37,7 @@ function topojsonLoad(url, options) {
     xhr(url, function(err, response) {
         if (err) return;
         layer.addData(topojsonParse(response.responseText));
+        layer.fire('ready');
     });
     return layer;
 }
@@ -55,8 +57,11 @@ function topojsonParse(data) {
 function csvLoad(url, options) {
     var layer = L.geoJson();
     xhr(url, function(err, response) {
-        if (err) return;
+        if (err) return layer.fire('error', {
+            error: err
+        });
         csvParse(response.responseText, options, layer);
+        layer.fire('ready');
     });
     return layer;
 }
@@ -64,8 +69,11 @@ function csvLoad(url, options) {
 function csvParse(csv, options, layer) {
     layer = layer || L.geoJson();
     csv2geojson.csv2geojson(csv, function(err, geojson) {
-        if (err) return;
+        if (err) return layer.fire('error', {
+            error: err
+        });
         layer.addData(geojson);
+        layer.fire('ready');
     });
     return layer;
 }
@@ -73,10 +81,15 @@ function csvParse(csv, options, layer) {
 function gpxLoad(url, options) {
     var layer = L.geoJson();
     xhr(url, function(err, response) {
-        if (err) return;
+        if (err) return layer.fire('error', {
+            error: err
+        });
         var xml = getXML(response);
-        if (!xml) return;
+        if (!xml)  return layer.fire('error', {
+            error: 'Could not parse GPX'
+        });
         gpxParse(xml, options, layer);
+        layer.fire('ready');
     });
     return layer;
 }
@@ -91,10 +104,15 @@ function gpxParse(gpx, options, layer) {
 function kmlLoad(url, options) {
     var layer = L.geoJson();
     xhr(url, function(err, response) {
-        if (err) return;
+        if (err) return layer.fire('error', {
+            error: err
+        });
         var xml = getXML(response);
-        if (!xml) return;
+        if (!xml)  return layer.fire('error', {
+            error: 'Could not parse KML'
+        });
         kmlParse(xml, options, layer);
+        layer.fire('ready');
     });
     return layer;
 }
@@ -109,8 +127,11 @@ function kmlParse(gpx, options, layer) {
 function wktLoad(url, options) {
     var layer = L.geoJson();
     xhr(url, function(err, response) {
-        if (err) return;
+        if (err) return layer.fire('error', {
+            error: err
+        });
         wktParse(response.responseText, options, layer);
+        layer.fire('ready');
     });
     return layer;
 }

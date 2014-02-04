@@ -42,6 +42,33 @@ omnivore.geojson('a.geojson').addTo(map);
 * `.topojson(url)`: Load & parse TopoJSON, and return layer.
 * `.topojson.parse(topojson)`: Parse TopoJSON (given as a string or object), and return layer.
 
+### async & events
+
+Each function returns an `L.geoJson` object. Functions that load from URLs
+are **asynchronous**, so they will **not** immediately expose accurate `.setGeoJSON()` functions.
+
+For this reason, we fire events:
+
+* `ready`: fired when all data is loaded into the layer
+* `error`: fired if data can't be loaded or parsed
+
+```js
+var layer = omnivore.gpx('a.gpx')
+    .on('ready', function() {
+        // when this is fired, the layer
+        // is done being initialized
+    })
+    .on('error', function() {
+        // fired if the layer can't be loaded over AJAX
+        // or can't be parsed
+    })
+    .addTo(map);
+```
+
+`ready` does **not** fire if you don't use an asynchronous form of the function
+like `.topojson.parse()`: because you don't need an event. Just run your code
+after the call.
+
 ## FAQ
 
 * **What if I just want one format?** Lucky for you, each format is specified
