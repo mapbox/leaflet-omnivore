@@ -30,8 +30,8 @@ omnivore.geojson('a.geojson').addTo(map);
 
 ## api
 
-* `.csv(url)`: Load & parse CSV, and return layer.
-* `.csv.parse(csvString)`: Parse CSV, and return layer.
+* `.csv(url, options?)`: Load & parse CSV, and return layer. Options are the same as [csv2geojson](https://github.com/mapbox/csv2geojson#api): `latfield, lonfield, delimiter`
+* `.csv.parse(csvString, options?)`: Parse CSV, and return layer.
 * `.kml(url)`: Load & parse KML, and return layer.
 * `.kml.parse(kmlString)`: Parse KML, and return layer.
 * `.gpx(url)`: Load & parse GPX, and return layer.

@@ -24,7 +24,7 @@ module.exports.wkt.parse = wktParse;
 function geojsonLoad(url, options) {
     var layer = L.geoJson();
     xhr(url, function(err, response) {
-        if (err) return;
+        if (err) return layer.fire('error', { error: err });
         layer.addData(JSON.parse(response.responseText));
         layer.fire('ready');
     });
@@ -33,11 +33,12 @@ function geojsonLoad(url, options) {
 
 function topojsonLoad(url, options) {
     var layer = L.geoJson();
-    xhr(url, function(err, response) {
-        if (err) return;
+    xhr(url, onload);
+    function onload(err, response) {
+        if (err) return layer.fire('error', { error: err });
         layer.addData(topojsonParse(response.responseText));
         layer.fire('ready');
-    });
+    }
     return layer;
 }
 
@@ -55,13 +56,10 @@ function topojsonParse(data) {
 
 function csvLoad(url, options) {
     var layer = L.geoJson();
-    xhr(url, function(err, response) {
+    xhr(url, onload);
+    function onload(err, response) {
         var error;
-        if (err) {
-            return layer.fire('error', {
-                error: err
-            });
-        }
+        if (err) return layer.fire('error', { error: err });
         function avoidReady() {
             error = true;
         }
@@ -69,34 +67,33 @@ function csvLoad(url, options) {
         csvParse(response.responseText, options, layer);
         layer.off('error', avoidReady);
         if (!error) layer.fire('ready');
-    });
+    }
     return layer;
 }
 
 function csvParse(csv, options, layer) {
     layer = layer || L.geoJson();
-    csv2geojson.csv2geojson(csv, function(err, geojson) {
-        if (err) return layer.fire('error', {
-            error: err
-        });
+    options = options || {};
+    csv2geojson.csv2geojson(csv, options, onparse);
+    function onparse(err, geojson) {
+        if (err) return layer.fire('error', { error: err });
         layer.addData(geojson);
-    });
+    }
     return layer;
 }
 
 function gpxLoad(url, options) {
     var layer = L.geoJson();
-    xhr(url, function(err, response) {
-        if (err) return layer.fire('error', {
-            error: err
-        });
+    xhr(url, onload);
+    function onload(err, response) {
+        if (err) return layer.fire('error', { error: err });
         var xml = getXML(response);
         if (!xml)  return layer.fire('error', {
             error: 'Could not parse GPX'
         });
         gpxParse(xml, options, layer);
         layer.fire('ready');
-    });
+    }
     return layer;
 }
 
@@ -109,17 +106,16 @@ function gpxParse(gpx, options, layer) {
 
 function kmlLoad(url, options) {
     var layer = L.geoJson();
-    xhr(url, function(err, response) {
-        if (err) return layer.fire('error', {
-            error: err
-        });
+    xhr(url, onload);
+    function onload(err, response) {
+        if (err) return layer.fire('error', { error: err });
         var xml = getXML(response);
         if (!xml)  return layer.fire('error', {
             error: 'Could not parse KML'
         });
         kmlParse(xml, options, layer);
         layer.fire('ready');
-    });
+    }
     return layer;
 }
 
@@ -132,13 +128,12 @@ function kmlParse(gpx, options, layer) {
 
 function wktLoad(url, options) {
     var layer = L.geoJson();
-    xhr(url, function(err, response) {
-        if (err) return layer.fire('error', {
-            error: err
-        });
+    xhr(url, onload);
+    function onload(err, response) {
+        if (err) return layer.fire('error', { error: err });
         wktParse(response.responseText, options, layer);
         layer.fire('ready');
-    });
+    }
     return layer;
 }
 
@@ -149,9 +144,13 @@ function wktParse(wkt, options, layer) {
     return layer;
 }
 
+// When XML is served without a proper mimetype, browsers don't fill out
+// responseXML, so we need to parse it manually
 function getXML(response) {
     try {
-        return response.responseXML || (new DOMParser()).parseFromString(response.responseText, 'text/xml');
+        return response.responseXML ||
+            (new DOMParser())
+                .parseFromString(response.responseText, 'text/xml');
     } catch(e) {
         return null;
     }

@@ -25,7 +25,7 @@ module.exports.wkt.parse = wktParse;
 function geojsonLoad(url, options) {
     var layer = L.geoJson();
     xhr(url, function(err, response) {
-        if (err) return;
+        if (err) return layer.fire('error', { error: err });
         layer.addData(JSON.parse(response.responseText));
         layer.fire('ready');
     });
@@ -34,11 +34,12 @@ function geojsonLoad(url, options) {
 
 function topojsonLoad(url, options) {
     var layer = L.geoJson();
-    xhr(url, function(err, response) {
-        if (err) return;
+    xhr(url, onload);
+    function onload(err, response) {
+        if (err) return layer.fire('error', { error: err });
         layer.addData(topojsonParse(response.responseText));
         layer.fire('ready');
-    });
+    }
     return layer;
 }
 
@@ -56,13 +57,10 @@ function topojsonParse(data) {
 
 function csvLoad(url, options) {
     var layer = L.geoJson();
-    xhr(url, function(err, response) {
+    xhr(url, onload);
+    function onload(err, response) {
         var error;
-        if (err) {
-            return layer.fire('error', {
-                error: err
-            });
-        }
+        if (err) return layer.fire('error', { error: err });
         function avoidReady() {
             error = true;
         }
@@ -70,34 +68,33 @@ function csvLoad(url, options) {
         csvParse(response.responseText, options, layer);
         layer.off('error', avoidReady);
         if (!error) layer.fire('ready');
-    });
+    }
     return layer;
 }
 
 function csvParse(csv, options, layer) {
     layer = layer || L.geoJson();
-    csv2geojson.csv2geojson(csv, function(err, geojson) {
-        if (err) return layer.fire('error', {
-            error: err
-        });
+    options = options || {};
+    csv2geojson.csv2geojson(csv, options, onparse);
+    function onparse(err, geojson) {
+        if (err) return layer.fire('error', { error: err });
         layer.addData(geojson);
-    });
+    }
     return layer;
 }
 
 function gpxLoad(url, options) {
     var layer = L.geoJson();
-    xhr(url, function(err, response) {
-        if (err) return layer.fire('error', {
-            error: err
-        });
+    xhr(url, onload);
+    function onload(err, response) {
+        if (err) return layer.fire('error', { error: err });
         var xml = getXML(response);
         if (!xml)  return layer.fire('error', {
             error: 'Could not parse GPX'
         });
         gpxParse(xml, options, layer);
         layer.fire('ready');
-    });
+    }
     return layer;
 }
 
@@ -110,17 +107,16 @@ function gpxParse(gpx, options, layer) {
 
 function kmlLoad(url, options) {
     var layer = L.geoJson();
-    xhr(url, function(err, response) {
-        if (err) return layer.fire('error', {
-            error: err
-        });
+    xhr(url, onload);
+    function onload(err, response) {
+        if (err) return layer.fire('error', { error: err });
         var xml = getXML(response);
         if (!xml)  return layer.fire('error', {
             error: 'Could not parse KML'
         });
         kmlParse(xml, options, layer);
         layer.fire('ready');
-    });
+    }
     return layer;
 }
 
@@ -133,13 +129,12 @@ function kmlParse(gpx, options, layer) {
 
 function wktLoad(url, options) {
     var layer = L.geoJson();
-    xhr(url, function(err, response) {
-        if (err) return layer.fire('error', {
-            error: err
-        });
+    xhr(url, onload);
+    function onload(err, response) {
+        if (err) return layer.fire('error', { error: err });
         wktParse(response.responseText, options, layer);
         layer.fire('ready');
-    });
+    }
     return layer;
 }
 
@@ -150,9 +145,13 @@ function wktParse(wkt, options, layer) {
     return layer;
 }
 
+// When XML is served without a proper mimetype, browsers don't fill out
+// responseXML, so we need to parse it manually
 function getXML(response) {
     try {
-        return response.responseXML || (new DOMParser()).parseFromString(response.responseText, 'text/xml');
+        return response.responseXML ||
+            (new DOMParser())
+                .parseFromString(response.responseText, 'text/xml');
     } catch(e) {
         return null;
     }
@@ -9088,15 +9087,34 @@ test('gpx', function (t) {
     });
 });
 
-test('csv-fail', function (t) {
-    t.plan(2);
+test('csv fail', function (t) {
+    t.plan(4);
     var layer = omnivore.csv('a.gpx');
     t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
     layer.on('ready', function() {
         t.fail('fires ready event');
     });
-    layer.on('error', function() {
+    layer.on('error', function(e) {
+        t.equal(e.error.message, 'Latitude and longitude fields not present');
+        t.equal(e.error.type, 'Error');
         t.pass('fires error event');
+    });
+});
+
+test('csv options', function (t) {
+    t.plan(2);
+    var layer = omnivore.csv('options.csv', {
+        latfield: 'a',
+        lonfield: 'b'
+    });
+    layer.on('ready', function() {
+        t.pass('fires ready event');
+        t.deepEqual(
+            layer.toGeoJSON().features[0].geometry.coordinates,
+            [10, 20], 'parses coordinates');
+    });
+    layer.on('error', function() {
+        t.fail('fires error event');
     });
 });
 
@@ -9169,6 +9187,18 @@ test('geojson', function (t) {
     });
     layer.on('error', function() {
         t.fail('does not fire error event');
+    });
+});
+
+test('geojson: fail', function (t) {
+    t.plan(2);
+    var layer = omnivore.geojson('404 does not exist');
+    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
+    layer.on('ready', function() {
+        t.fail('fires ready event');
+    });
+    layer.on('error', function(e) {
+        t.pass('fires error event');
     });
 });
 

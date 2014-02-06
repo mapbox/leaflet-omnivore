@@ -13,15 +13,34 @@ test('gpx', function (t) {
     });
 });
 
-test('csv-fail', function (t) {
-    t.plan(2);
+test('csv fail', function (t) {
+    t.plan(4);
     var layer = omnivore.csv('a.gpx');
     t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
     layer.on('ready', function() {
         t.fail('fires ready event');
     });
-    layer.on('error', function() {
+    layer.on('error', function(e) {
+        t.equal(e.error.message, 'Latitude and longitude fields not present');
+        t.equal(e.error.type, 'Error');
         t.pass('fires error event');
+    });
+});
+
+test('csv options', function (t) {
+    t.plan(2);
+    var layer = omnivore.csv('options.csv', {
+        latfield: 'a',
+        lonfield: 'b'
+    });
+    layer.on('ready', function() {
+        t.pass('fires ready event');
+        t.deepEqual(
+            layer.toGeoJSON().features[0].geometry.coordinates,
+            [10, 20], 'parses coordinates');
+    });
+    layer.on('error', function() {
+        t.fail('fires error event');
     });
 });
 
@@ -94,5 +113,17 @@ test('geojson', function (t) {
     });
     layer.on('error', function() {
         t.fail('does not fire error event');
+    });
+});
+
+test('geojson: fail', function (t) {
+    t.plan(2);
+    var layer = omnivore.geojson('404 does not exist');
+    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
+    layer.on('ready', function() {
+        t.fail('fires ready event');
+    });
+    layer.on('error', function(e) {
+        t.pass('fires error event');
     });
 });
