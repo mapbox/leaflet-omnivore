@@ -33,6 +33,7 @@
   "devDependencies": {
     "browserify": "~3.24.11",
     "brfs": "0.0.9",
-    "tape": "~2.4.2"
+    "tape": "~2.4.2",
+    "uglify-js": "~2.4.12"
   }
 }
