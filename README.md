@@ -14,6 +14,16 @@ It currently supports:
 Omnivore also includes an AJAX library, [corslite](https://github.com/mapbox/corslite),
 so you can specify what you want to add to the map with just a URL.
 
+## Installation
+
+use it easily with the [Mapbox Plugins CDN](http://mapbox.com/mapbox.js/plugins/#leaflet-omnivore):
+
+```html
+<script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.0.0/leaflet-omnivore.min.js'></script>
+```
+
+Or download `leaflet-omnivore.min.js` from this repository.
+
 ## example
 
 ```js
@@ -68,6 +78,17 @@ var layer = omnivore.gpx('a.gpx')
 `ready` does **not** fire if you don't use an asynchronous form of the function
 like `.topojson.parse()`: because you don't need an event. Just run your code
 after the call.
+
+## Development
+
+This is a [browserify](http://browserify.org/) project:
+
+```sh
+git clone git@github.com:mapbox/leaflet-omnivore.git
+cd leaflet-omnivore
+npm install
+make
+```
 
 ## FAQ
 
