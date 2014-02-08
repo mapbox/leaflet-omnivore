@@ -1,5 +1,7 @@
 # leaflet-omnivore
 
+![](https://farm8.staticflickr.com/7373/12376158164_e335b4e61d_b.jpg)
+
 [Leaflet](http://leafletjs.com/) supports the [GeoJSON](http://geojson.org/) format
 by default. What if you have something else? That's where omnivore comes in.
 
