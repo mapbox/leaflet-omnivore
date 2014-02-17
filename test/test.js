@@ -1,4 +1,5 @@
 var test = require('tape'),
+    fs = require('fs'),
     omnivore = require('../');
 
 test('gpx', function (t) {
@@ -11,6 +12,13 @@ test('gpx', function (t) {
     layer.on('error', function() {
         t.fail('does not fire error event');
     });
+});
+
+test('gpx.parse', function (t) {
+    t.plan(2);
+    var layer = omnivore.gpx.parse(fs.readFileSync('./test/a.gpx'));
+    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
+    t.equal(layer.toGeoJSON().features.length, 1);
 });
 
 test('csv fail', function (t) {
@@ -54,6 +62,13 @@ test('kml', function (t) {
     layer.on('error', function() {
         t.fail('does not fire error event');
     });
+});
+
+test('kml.parse', function (t) {
+    t.plan(2);
+    var layer = omnivore.kml.parse(fs.readFileSync('./test/a.kml'));
+    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
+    t.equal(layer.toGeoJSON().features.length, 2);
 });
 
 test('csv', function (t) {
