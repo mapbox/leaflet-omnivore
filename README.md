@@ -45,9 +45,9 @@ omnivore.geojson('a.geojson').addTo(map);
 * `.csv(url, options?)`: Load & parse CSV, and return layer. Options are the same as [csv2geojson](https://github.com/mapbox/csv2geojson#api): `latfield, lonfield, delimiter`
 * `.csv.parse(csvString, options?)`: Parse CSV, and return layer.
 * `.kml(url)`: Load & parse KML, and return layer.
-* `.kml.parse(kmlString)`: Parse KML, and return layer.
+* `.kml.parse(kmlString | gpxDom)`: Parse KML from a string of XML or XML DOM, and return layer.
 * `.gpx(url)`: Load & parse GPX, and return layer.
-* `.gpx.parse(gpxString)`: Parse GPX, and return layer.
+* `.gpx.parse(gpxString | gpxDom)`: Parse GPX from a string of XML or XML DOM, and return layer.
 * `.geojson(url)`: Load GeoJSON file at URL, parse GeoJSON, and return layer.
 * `.wkt(url)`: Load & parse WKT, and return layer.
 * `.wkt.parse(wktString)`: Parse WKT, and return layer.
