@@ -87,20 +87,26 @@ function gpxLoad(url, options) {
     var layer = L.geoJson();
     xhr(url, onload);
     function onload(err, response) {
+        var error;
         if (err) return layer.fire('error', { error: err });
-        var xml = getXML(response);
-        if (!xml)  return layer.fire('error', {
-            error: 'Could not parse GPX'
-        });
-        gpxParse(xml, options, layer);
-        layer.fire('ready');
+        function avoidReady() {
+            error = true;
+        }
+        layer.on('error', avoidReady);
+        gpxParse(response.responseXML || response.responseText, options, layer);
+        layer.off('error', avoidReady);
+        if (!error) layer.fire('ready');
     }
     return layer;
 }
 
 function gpxParse(gpx, options, layer) {
+    var xml = parseXML(gpx);
+    if (!xml) return layer.fire('error', {
+        error: 'Could not parse GPX'
+    });
     layer = layer || L.geoJson();
-    var geojson = toGeoJSON.gpx(gpx);
+    var geojson = toGeoJSON.gpx(xml);
     layer.addData(geojson);
     return layer;
 }
@@ -109,20 +115,26 @@ function kmlLoad(url, options) {
     var layer = L.geoJson();
     xhr(url, onload);
     function onload(err, response) {
+        var error;
         if (err) return layer.fire('error', { error: err });
-        var xml = getXML(response);
-        if (!xml)  return layer.fire('error', {
-            error: 'Could not parse KML'
-        });
-        kmlParse(xml, options, layer);
-        layer.fire('ready');
+        function avoidReady() {
+            error = true;
+        }
+        layer.on('error', avoidReady);
+        kmlParse(response.responseXML || response.responseText, options, layer);
+        layer.off('error', avoidReady);
+        if (!error) layer.fire('ready');
     }
     return layer;
 }
 
 function kmlParse(gpx, options, layer) {
+    var xml = parseXML(gpx);
+    if (!xml) return layer.fire('error', {
+        error: 'Could not parse GPX'
+    });
     layer = layer || L.geoJson();
-    var geojson = toGeoJSON.kml(gpx);
+    var geojson = toGeoJSON.kml(xml);
     layer.addData(geojson);
     return layer;
 }
@@ -145,15 +157,11 @@ function wktParse(wkt, options, layer) {
     return layer;
 }
 
-// When XML is served without a proper mimetype, browsers don't fill out
-// responseXML, so we need to parse it manually
-function getXML(response) {
-    try {
-        return response.responseXML ||
-            (new DOMParser())
-                .parseFromString(response.responseText, 'text/xml');
-    } catch(e) {
-        return null;
+function parseXML(str) {
+    if (typeof str === 'string') {
+        return (new DOMParser()).parseFromString(str, 'text/xml');
+    } else {
+        return str;
     }
 }
 
