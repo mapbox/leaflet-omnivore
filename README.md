@@ -28,6 +28,16 @@ Or download `leaflet-omnivore.min.js` from this repository.
 
 ## example
 
+Live examples:
+
+* [WKT](https://www.mapbox.com/mapbox.js/example/v1.0.0/omnivore-wkt/)
+* [TopoJSON](https://www.mapbox.com/mapbox.js/example/v1.0.0/omnivore-topojson/)
+* [Tooltips](https://www.mapbox.com/mapbox.js/example/v1.0.0/omnivore-kml-tooltip/)
+* [KML](https://www.mapbox.com/mapbox.js/example/v1.0.0/omnivore-kml/)
+* [GPX](https://www.mapbox.com/mapbox.js/example/v1.0.0/omnivore-gpx/)
+* [Icons](https://www.mapbox.com/mapbox.js/example/v1.0.0/markers-from-csv-custom-style/)
+* [CSV](https://www.mapbox.com/mapbox.js/example/v1.0.0/markers-from-csv/)
+
 ```js
 var map = L.mapbox.map('map', 'examples.map-9ijuk24y')
     .setView([38, -102.0], 5);
