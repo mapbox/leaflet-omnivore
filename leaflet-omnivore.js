@@ -23,7 +23,7 @@ module.exports.wkt = wktLoad;
 module.exports.wkt.parse = wktParse;
 
 function geojsonLoad(url, options) {
-    var layer = L.geoJson();
+    var layer = L.geoJson(null,options);
     xhr(url, function(err, response) {
         if (err) return layer.fire('error', { error: err });
         layer.addData(JSON.parse(response.responseText));
@@ -33,7 +33,7 @@ function geojsonLoad(url, options) {
 }
 
 function topojsonLoad(url, options) {
-    var layer = L.geoJson();
+    var layer = L.geoJson(null,options);
     xhr(url, onload);
     function onload(err, response) {
         if (err) return layer.fire('error', { error: err });
