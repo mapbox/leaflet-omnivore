@@ -4,7 +4,8 @@
   "description": "a geospatial format parser for Leaflet",
   "main": "index.js",
   "scripts": {
-    "test": "tap"
+    "test": "tap",
+    "doc": "markdox index.js --output=API.md"
   },
   "repository": {
     "type": "git",
@@ -34,6 +35,7 @@
     "browserify": "~3.24.11",
     "brfs": "~0.2.1",
     "tape": "~2.4.2",
-    "uglify-js": "~2.4.12"
+    "uglify-js": "~2.4.12",
+    "markdox": "~0.1.4"
   }
 }

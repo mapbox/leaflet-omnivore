@@ -22,6 +22,8 @@ module.exports.wkt = wktLoad;
 module.exports.wkt.parse = wktParse;
 
 /**
+ * Load a [GeoJSON](http://geojson.org/) document into a layer and return the layer.
+ *
  * @param {string} url
  * @param {object} options
  * @param {object} customLayer
@@ -38,6 +40,8 @@ function geojsonLoad(url, options, customLayer) {
 }
 
 /**
+ * Load a [TopoJSON](https://github.com/mbostock/topojson) document into a layer and return the layer.
+ *
  * @param {string} url
  * @param {object} options
  * @param {object} customLayer
@@ -55,6 +59,8 @@ function topojsonLoad(url, options, customLayer) {
 }
 
 /**
+ * Load a CSV document into a layer and return the layer.
+ *
  * @param {string} url
  * @param {object} options
  * @param {object} customLayer
@@ -78,6 +84,8 @@ function csvLoad(url, options, customLayer) {
 }
 
 /**
+ * Load a GPX document into a layer and return the layer.
+ *
  * @param {string} url
  * @param {object} options
  * @param {object} customLayer
@@ -101,6 +109,8 @@ function gpxLoad(url, options, customLayer) {
 }
 
 /**
+ * Load a [KML](https://developers.google.com/kml/documentation/) document into a layer and return the layer.
+ *
  * @param {string} url
  * @param {object} options
  * @param {object} customLayer
@@ -124,6 +134,8 @@ function kmlLoad(url, options, customLayer) {
 }
 
 /**
+ * Load a WKT (Well Known Text) string into a layer and return the layer
+ *
  * @param {string} url
  * @param {object} options
  * @param {object} customLayer
