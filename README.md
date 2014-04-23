@@ -52,17 +52,47 @@ omnivore.geojson('a.geojson').addTo(map);
 
 ## api
 
-* `.csv(url, options?)`: Load & parse CSV, and return layer. Options are the same as [csv2geojson](https://github.com/mapbox/csv2geojson#api): `latfield, lonfield, delimiter`
+Arguments with `?` are optional.
+
+By default, the library will construct a `L.geoJson()` layer internally and
+call `.addData(geojson)` on it in order to load it full of GeoJSON. If you want
+to use a different kind of layer, like a `L.mapbox.featureLayer()`, you can,
+by passing it as `customLayer`, as long as it supports events and `addData()`.
+You can also use this API to pass custom options to a `L.geoJson()` instance.:
+
+
+* `.csv(url, options?, customLayer?)`: Load & parse CSV, and return layer. Options are the same as [csv2geojson](https://github.com/mapbox/csv2geojson#api): `latfield, lonfield, delimiter`
 * `.csv.parse(csvString, options?)`: Parse CSV, and return layer.
 * `.kml(url)`: Load & parse KML, and return layer.
 * `.kml.parse(kmlString | gpxDom)`: Parse KML from a string of XML or XML DOM, and return layer.
-* `.gpx(url)`: Load & parse GPX, and return layer.
+* `.gpx(url, options?, customLayer?)`: Load & parse GPX, and return layer.
 * `.gpx.parse(gpxString | gpxDom)`: Parse GPX from a string of XML or XML DOM, and return layer.
-* `.geojson(url)`: Load GeoJSON file at URL, parse GeoJSON, and return layer.
-* `.wkt(url)`: Load & parse WKT, and return layer.
+* `.geojson(url, options?, customLayer?)`: Load GeoJSON file at URL, parse GeoJSON, and return layer.
+* `.wkt(url, options?, customLayer?)`: Load & parse WKT, and return layer.
 * `.wkt.parse(wktString)`: Parse WKT, and return layer.
-* `.topojson(url)`: Load & parse TopoJSON, and return layer.
+* `.topojson(url, options?, customLayer?)`: Load & parse TopoJSON, and return layer.
 * `.topojson.parse(topojson)`: Parse TopoJSON (given as a string or object), and return layer.
+
+### custom layers
+
+Passing custom options:
+
+```js
+var customLayer = L.geoJson(null, {
+    filter: function() {
+        // my custom filter function
+        return true;
+    }
+});
+
+var myLayer = omnivore.csv('foo', null, customLayer);
+```
+
+Using a `L.mapbox.featureLayer`:
+
+```js
+var layer = omnivore.gpx('a.gpx', null, L.mapbox.featureLayer());
+```
 
 ### async & events
 
@@ -105,7 +135,9 @@ make
 ## FAQ
 
 * **What if I just want one format?** Lucky for you, each format is specified
-  in a different module, so you can just use csv2geojson, wellknown, or toGeoJSON
+  in a different module, so you can just use [TopoJSON](https://github.com/mbostock/topojson),
+  [csv2geojson](https://github.com/mapbox/csv2geojson), [wellknown](https://github.com/mapbox/wellknown), or
+  [toGeoJSON](https://github.com/mapbox/togeojson)
   individually.
 * **My AJAX request is failing for a cross-domain request**. Read up on the [Same Origin Restriction](http://en.wikipedia.org/wiki/Same-origin_policy).
   By default, we use corslite, so cross-domain requests will try to use [CORS](http://en.wikipedia.org/wiki/Cross-origin_resource_sharing)

@@ -21,6 +21,11 @@ module.exports.kml.parse = kmlParse;
 module.exports.wkt = wktLoad;
 module.exports.wkt.parse = wktParse;
 
+function addData(l, d) {
+    if ('addData' in l) l.addData(d);
+    if ('setGeoJSON' in l) l.setGeoJSON(d);
+}
+
 /**
  * Load a [GeoJSON](http://geojson.org/) document into a layer and return the layer.
  *
@@ -33,7 +38,7 @@ function geojsonLoad(url, options, customLayer) {
     var layer = customLayer || L.geoJson();
     xhr(url, function(err, response) {
         if (err) return layer.fire('error', { error: err });
-        layer.addData(JSON.parse(response.responseText));
+        addData(layer, JSON.parse(response.responseText));
         layer.fire('ready');
     });
     return layer;
@@ -52,7 +57,7 @@ function topojsonLoad(url, options, customLayer) {
     xhr(url, onload);
     function onload(err, response) {
         if (err) return layer.fire('error', { error: err });
-        layer.addData(topojsonParse(response.responseText));
+        addData(layer, topojsonParse(response.responseText));
         layer.fire('ready');
     }
     return layer;
@@ -170,7 +175,7 @@ function csvParse(csv, options, layer) {
     csv2geojson.csv2geojson(csv, options, onparse);
     function onparse(err, geojson) {
         if (err) return layer.fire('error', { error: err });
-        layer.addData(geojson);
+        addData(layer, geojson);
     }
     return layer;
 }
@@ -182,7 +187,7 @@ function gpxParse(gpx, options, layer) {
     });
     layer = layer || L.geoJson();
     var geojson = toGeoJSON.gpx(xml);
-    layer.addData(geojson);
+    addData(layer, geojson);
     return layer;
 }
 
@@ -194,14 +199,14 @@ function kmlParse(gpx, options, layer) {
     });
     layer = layer || L.geoJson();
     var geojson = toGeoJSON.kml(xml);
-    layer.addData(geojson);
+    addData(layer, geojson);
     return layer;
 }
 
 function wktParse(wkt, options, layer) {
     layer = layer || L.geoJson();
     var geojson = wellknown(wkt);
-    layer.addData(geojson);
+    addData(layer, geojson);
     return layer;
 }
 
