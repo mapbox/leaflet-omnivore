@@ -22,7 +22,7 @@ module.exports.wkt = wktLoad;
 module.exports.wkt.parse = wktParse;
 
 function geojsonLoad(url, options) {
-    var layer = L.geoJson();
+    var layer = L.geoJson(null, options);
     xhr(url, function(err, response) {
         if (err) return layer.fire('error', { error: err });
         layer.addData(JSON.parse(response.responseText));
@@ -32,7 +32,7 @@ function geojsonLoad(url, options) {
 }
 
 function topojsonLoad(url, options) {
-    var layer = L.geoJson();
+    var layer = L.geoJson(null, options);
     xhr(url, onload);
     function onload(err, response) {
         if (err) return layer.fire('error', { error: err });
@@ -55,7 +55,7 @@ function topojsonParse(data) {
 }
 
 function csvLoad(url, options) {
-    var layer = L.geoJson();
+    var layer = L.geoJson(null, options);
     xhr(url, onload);
     function onload(err, response) {
         var error;
@@ -72,7 +72,7 @@ function csvLoad(url, options) {
 }
 
 function csvParse(csv, options, layer) {
-    layer = layer || L.geoJson();
+    layer = layer || L.geoJson(null, options);
     options = options || {};
     csv2geojson.csv2geojson(csv, options, onparse);
     function onparse(err, geojson) {
@@ -83,7 +83,7 @@ function csvParse(csv, options, layer) {
 }
 
 function gpxLoad(url, options) {
-    var layer = L.geoJson();
+    var layer = L.geoJson(null, options);
     xhr(url, onload);
     function onload(err, response) {
         var error;
@@ -104,14 +104,14 @@ function gpxParse(gpx, options, layer) {
     if (!xml) return layer.fire('error', {
         error: 'Could not parse GPX'
     });
-    layer = layer || L.geoJson();
+    layer = layer || L.geoJson(null, options);
     var geojson = toGeoJSON.gpx(xml);
     layer.addData(geojson);
     return layer;
 }
 
 function kmlLoad(url, options) {
-    var layer = L.geoJson();
+    var layer = L.geoJson(null, options);
     xhr(url, onload);
     function onload(err, response) {
         var error;
@@ -132,14 +132,14 @@ function kmlParse(gpx, options, layer) {
     if (!xml) return layer.fire('error', {
         error: 'Could not parse GPX'
     });
-    layer = layer || L.geoJson();
+    layer = layer || L.geoJson(null, options);
     var geojson = toGeoJSON.kml(xml);
     layer.addData(geojson);
     return layer;
 }
 
 function wktLoad(url, options) {
-    var layer = L.geoJson();
+    var layer = L.geoJson(null, options);
     xhr(url, onload);
     function onload(err, response) {
         if (err) return layer.fire('error', { error: err });
@@ -150,7 +150,7 @@ function wktLoad(url, options) {
 }
 
 function wktParse(wkt, options, layer) {
-    layer = layer || L.geoJson();
+    layer = layer || L.geoJson(null, options);
     var geojson = wellknown(wkt);
     layer.addData(geojson);
     return layer;
