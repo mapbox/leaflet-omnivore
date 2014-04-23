@@ -8,3 +8,8 @@ leaflet-omnivore.js: index.js
 
 test/bundle.js: test/test.js index.js
 	./node_modules/.bin/browserify -t brfs test/test.js -d > test/bundle.js
+
+clean:
+	rm leaflet-omnivore.js
+	rm leaflet-omnivore.min.js
+	rm test/bundle.js
