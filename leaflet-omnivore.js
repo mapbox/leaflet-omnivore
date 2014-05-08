@@ -123,7 +123,7 @@ function gpxLoad(url, options, customLayer) {
  * @returns {object}
  */
 function kmlLoad(url, options, customLayer) {
-    var layer = L.geoJson();
+    var layer = customLayer || L.geoJson();
     xhr(url, onload);
     function onload(err, response) {
         var error;
