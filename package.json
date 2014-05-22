@@ -4,8 +4,7 @@
   "description": "a geospatial format parser for Leaflet",
   "main": "index.js",
   "scripts": {
-    "test": "jshint index.js",
-    "doc": "markdox index.js --output=API.md"
+    "test": "jshint index.js"
   },
   "repository": {
     "type": "git",
@@ -28,7 +27,7 @@
     "csv2geojson": "~3.6.1",
     "togeojson": "~0.5.0",
     "corslite": "0.0.5",
-    "wellknown": "~0.1.2",
+    "wellknown": "0.2.0",
     "topojson": "~1.6.8"
   },
   "devDependencies": {
