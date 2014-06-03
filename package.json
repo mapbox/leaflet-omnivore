@@ -15,7 +15,16 @@
     "formats",
     "kml",
     "csv",
-    "gpx"
+    "gpx",
+    "geojson",
+    "kml",
+    "leaflet",
+    "maps",
+    "gpx",
+    "wkt",
+    "topojson",
+    "format",
+    "converter"
   ],
   "author": "Tom MacWright",
   "license": "BSD",

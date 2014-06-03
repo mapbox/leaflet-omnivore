@@ -1,0 +1,5 @@
+{
+  "name": "leaflet-omnivore",
+  "version": "0.1.2",
+  "description": "a geospatial format parser for Leaflet"
+}
