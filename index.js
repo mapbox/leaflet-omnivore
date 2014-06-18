@@ -1,7 +1,7 @@
 var xhr = require('corslite'),
     csv2geojson = require('csv2geojson'),
     wellknown = require('wellknown'),
-    topojson = require('topojson'),
+    topojson = require('topojson/topojson.js'),
     toGeoJSON = require('togeojson');
 
 module.exports.geojson = geojsonLoad;

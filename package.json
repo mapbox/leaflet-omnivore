@@ -4,8 +4,9 @@
   "description": "a geospatial format parser for Leaflet",
   "main": "index.js",
   "scripts": {
-    "test": "zuul -- test/test.js --local",
-    "test-remote": "zuul -- test/test.js"
+    "test": "zuul --local -- test/test.js",
+    "test-remote": "zuul -- test/test.js",
+    "build": "browserify -s omnivore index.js > leaflet-omnivore.js && uglifyjs leaflet-omnivore.js -c -m > leaflet-omnivore.min.js"
   },
   "repository": {
     "type": "git",
@@ -42,12 +43,12 @@
   "dependencies": {
     "csv2geojson": "~3.6.1",
     "togeojson": "~0.5.0",
-    "corslite": "0.0.5",
+    "corslite": "0.0.6",
     "wellknown": "0.2.0",
-    "topojson": "~1.6.8"
+    "topojson": "1.6.8"
   },
   "devDependencies": {
-    "browserify": "3.24.11",
+    "browserify": "4.1.10",
     "brfs": "0.2.1",
     "tape": "2.4.2",
     "uglify-js": "2.4.12",
