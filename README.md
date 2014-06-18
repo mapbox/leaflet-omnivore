@@ -124,6 +124,11 @@ var layer = omnivore.gpx('a.gpx')
 like `.topojson.parse()`: because you don't need an event. Just run your code
 after the call.
 
+## IE<9
+
+IE9 and below [don't support ArrayBuffer](http://caniuse.com/#feat=typedarrays), so [topojson's usage of it](https://github.com/mbostock/topojson/blob/1a73fad3a4fddcf7a9def94f99534bd3619ff978/lib/topojson/topology/point-hash.js)
+will cause them to fail on import. If you need to support IE9, you can use [typedarray.js](https://github.com/inexorabletash/polyfill/blob/master/typedarray.js) as a polyfill.
+
 ## Development
 
 This is a [browserify](http://browserify.org/) project:
