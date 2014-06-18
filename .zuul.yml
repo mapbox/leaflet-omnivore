@@ -1,0 +1,11 @@
+ui: tape
+server: test/server.js
+browsers:
+  - name: chrome
+    version: latest
+  - name: safari
+    version: latest
+  - name: ie
+    version: latest
+  - name: firefox
+    version: latest
