@@ -61,7 +61,8 @@ By default, the library will construct a `L.geoJson()` layer internally and
 call `.addData(geojson)` on it in order to load it full of GeoJSON. If you want
 to use a different kind of layer, like a `L.mapbox.featureLayer()`, you can,
 by passing it as `customLayer`, as long as it supports events and `addData()`.
-You can also use this API to pass custom options to a `L.geoJson()` instance.:
+You can also use this API to pass custom options to a `L.geoJson()` instance using the `options`
+parameter:
 
 
 * `.csv(url, options?, customLayer?)`: Load & parse CSV, and return layer. Options are the same as [csv2geojson](https://github.com/mapbox/csv2geojson#api): `latfield, lonfield, delimiter`
@@ -75,6 +76,8 @@ You can also use this API to pass custom options to a `L.geoJson()` instance.:
 * `.wkt.parse(wktString)`: Parse WKT, and return layer.
 * `.topojson(url, options?, customLayer?)`: Load & parse TopoJSON, and return layer.
 * `.topojson.parse(topojson)`: Parse TopoJSON (given as a string or object), and return layer.
+
+The option parameter is exactly a [GeoJSON options]('http://leafletjs.com/reference.html#geojson-options'), which means that using any method with the signature `format()`,  format being one supported by omnivore (`csv`, `topojson`, ...), will result in the creation of an empty `L.geoJson` layer, with `options`, this layer being populated with data when is loaded.
 
 ### custom layers
 
@@ -95,6 +98,23 @@ Using a `L.mapbox.featureLayer`:
 
 ```js
 var layer = omnivore.gpx('a.gpx', null, L.mapbox.featureLayer());
+```
+
+### Layer options
+
+As stated in the Api section you can pass some options when loading a given format that will be added
+ to the `L.geoJson` layer that will be created.
+
+This means you can write the example above on the custom layers to
+
+```js
+var options = {
+    filter: function () {
+        // my custom filter function
+        return true;
+    }
+}
+var myLayer =  omnivore.csv('foo', options);
 ```
 
 ### async & events
