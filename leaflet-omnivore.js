@@ -36,7 +36,7 @@ function addData(l, d) {
  * @returns {object}
  */
 function geojsonLoad(url, options, customLayer) {
-    var layer = customLayer || L.geoJson();
+    var layer = customLayer || L.geoJson(null, options);
     xhr(url, function(err, response) {
         if (err) return layer.fire('error', { error: err });
         addData(layer, JSON.parse(response.responseText));
@@ -54,7 +54,7 @@ function geojsonLoad(url, options, customLayer) {
  * @returns {object}
  */
 function topojsonLoad(url, options, customLayer) {
-    var layer = customLayer || L.geoJson();
+    var layer = customLayer || L.geoJson(null, options);
     xhr(url, onload);
     function onload(err, response) {
         if (err) return layer.fire('error', { error: err });
@@ -73,7 +73,7 @@ function topojsonLoad(url, options, customLayer) {
  * @returns {object}
  */
 function csvLoad(url, options, customLayer) {
-    var layer = customLayer || L.geoJson();
+    var layer = customLayer || L.geoJson(null, options);
     xhr(url, onload);
     function onload(err, response) {
         var error;
@@ -98,7 +98,7 @@ function csvLoad(url, options, customLayer) {
  * @returns {object}
  */
 function gpxLoad(url, options, customLayer) {
-    var layer = customLayer || L.geoJson();
+    var layer = customLayer || L.geoJson(null, options);
     xhr(url, onload);
     function onload(err, response) {
         var error;
@@ -123,7 +123,7 @@ function gpxLoad(url, options, customLayer) {
  * @returns {object}
  */
 function kmlLoad(url, options, customLayer) {
-    var layer = customLayer || L.geoJson();
+    var layer = customLayer || L.geoJson(null, options);
     xhr(url, onload);
     function onload(err, response) {
         var error;
@@ -148,7 +148,7 @@ function kmlLoad(url, options, customLayer) {
  * @returns {object}
  */
 function wktLoad(url, options, customLayer) {
-    var layer = customLayer || L.geoJson();
+    var layer = customLayer || L.geoJson(null, options);
     xhr(url, onload);
     function onload(err, response) {
         if (err) return layer.fire('error', { error: err });
