@@ -156,6 +156,17 @@ test('topojson', function (t) {
     });
 });
 
+test('topojson options', function (t) {
+    t.plan(2);
+    var options = {
+        onEachFeature: function (feature, layer) {
+            t.pass('call the onEachFeature options');
+            t.ok(feature.geometry.type === 'LineString', 'receive the correct feature');
+        }
+    };
+    var layer = omnivore.topojson('a.topojson', options);
+});
+
 test('geojson', function (t) {
     t.plan(2);
     var layer = omnivore.geojson('a.geojson');
