@@ -58,6 +58,17 @@ test('gpx.parse', function (t) {
     t.equal(layer.toGeoJSON().features.length, 1);
 });
 
+test('gpx options', function (t) {
+    t.plan(2);
+    var options = {
+        onEachFeature: function (feature, layer) {
+            t.pass('call the onEachFeature options');
+            t.ok(feature.geometry.type === 'LineString', 'receive the correct feature geometry');
+        }
+    };
+    var layer = omnivore.gpx('a.gpx', options);
+});
+
 test('csv fail', function (t) {
     t.plan(4);
     var layer = omnivore.csv('a.gpx');
@@ -108,6 +119,21 @@ test('kml.parse', function (t) {
     t.equal(layer.toGeoJSON().features.length, 2);
 });
 
+test('kml options', function (t) {
+    t.plan(3);
+    var counter = 0;
+    var options = {
+        onEachFeature: function (feature, layer) {
+            t.pass('call the onEachFeature options');
+            counter++;
+        }
+    };
+    var layer = omnivore.kml('a.kml', options);
+    layer.on('ready', function () {
+      t.ok(counter === layer.toGeoJSON().features.length, 'onEachFeature should have been called twice');
+    });
+});
+
 test('csv', function (t) {
     t.plan(2);
     var layer = omnivore.csv('a.csv');
@@ -124,6 +150,18 @@ test('csv.parse', function (t) {
     t.plan(1);
     var lyr = omnivore.csv.parse('lat,lon,title\n0,0,"Hello"');
     t.ok(lyr instanceof L.GeoJSON, 'produces layer');
+});
+
+test('csv options', function (t) {
+    t.plan(3);
+    var options = {
+        onEachFeature: function (feature, layer) {
+            t.pass('call the onEachFeature options');
+            t.ok(feature.geometry.type === 'Point', 'receive the correct feature geometry');
+            t.ok(feature.properties.name === 'Hello World', 'receive the correct feature property');
+        }
+    };
+    var layer = omnivore.csv('a.csv', options);
 });
 
 test('wkt.parse', function (t) {
@@ -144,6 +182,17 @@ test('wkt', function (t) {
     });
 });
 
+test('wkt options', function (t) {
+    t.plan(2);
+    var options = {
+        onEachFeature: function (feature, layer) {
+            t.pass('call the onEachFeature options');
+            t.ok(feature.type === 'MultiPoint', 'receive the correct feature');
+        }
+    };
+    var layer = omnivore.wkt('a.wkt', options);
+});
+
 test('topojson', function (t) {
     t.plan(2);
     var layer = omnivore.topojson('a.topojson');
@@ -154,6 +203,17 @@ test('topojson', function (t) {
     layer.on('error', function() {
         t.fail('does not fire error event');
     });
+});
+
+test('topojson options', function (t) {
+    t.plan(2);
+    var options = {
+        onEachFeature: function (feature, layer) {
+            t.pass('call the onEachFeature options');
+            t.ok(feature.geometry.type === 'LineString', 'receive the correct feature');
+        }
+    };
+    var layer = omnivore.topojson('a.topojson', options);
 });
 
 test('geojson', function (t) {
@@ -178,4 +238,15 @@ test('geojson: fail', function (t) {
     layer.on('error', function(e) {
         t.pass('fires error event');
     });
+});
+
+test('geojson options', function (t) {
+    t.plan(2);
+    var options = {
+        onEachFeature: function (feature, layer) {
+            t.pass('call the onEachFeature options');
+            t.ok(feature.geometry.type === 'GeometryCollection', 'receive the correct feature');
+        }
+    };
+    var layer = omnivore.geojson('a.geojson', options);
 });
