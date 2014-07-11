@@ -190,3 +190,14 @@ test('geojson: fail', function (t) {
         t.pass('fires error event');
     });
 });
+
+test('geojson options', function (t) {
+    t.plan(2);
+    var options = {
+        onEachFeature: function (feature, layer) {
+            t.pass('call the onEachFeature options');
+            t.ok(feature.geometry.type === 'GeometryCollection', 'receive the correct feature');
+        }
+    };
+    var layer = omnivore.geojson('a.geojson', options);
+});
