@@ -58,6 +58,17 @@ test('gpx.parse', function (t) {
     t.equal(layer.toGeoJSON().features.length, 1);
 });
 
+test('gpx options', function (t) {
+    t.plan(2);
+    var options = {
+        onEachFeature: function (feature, layer) {
+            t.pass('call the onEachFeature options');
+            t.ok(feature.geometry.type === 'LineString', 'receive the correct feature geometry');
+        }
+    };
+    var layer = omnivore.gpx('a.gpx', options);
+});
+
 test('csv fail', function (t) {
     t.plan(4);
     var layer = omnivore.csv('a.gpx');
