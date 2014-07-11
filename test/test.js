@@ -144,6 +144,17 @@ test('wkt', function (t) {
     });
 });
 
+test('wkt options', function (t) {
+    t.plan(2);
+    var options = {
+        onEachFeature: function (feature, layer) {
+            t.pass('call the onEachFeature options');
+            t.ok(feature.type === 'MultiPoint', 'receive the correct feature');
+        }
+    };
+    var layer = omnivore.wkt('a.wkt', options);
+});
+
 test('topojson', function (t) {
     t.plan(2);
     var layer = omnivore.topojson('a.topojson');
