@@ -108,6 +108,21 @@ test('kml.parse', function (t) {
     t.equal(layer.toGeoJSON().features.length, 2);
 });
 
+test('kml options', function (t) {
+    t.plan(3);
+    var counter = 0;
+    var options = {
+        onEachFeature: function (feature, layer) {
+            t.pass('call the onEachFeature options');
+            counter++;
+        }
+    };
+    var layer = omnivore.kml('a.kml', options);
+    layer.on('ready', function () {
+      t.ok(counter === layer.toGeoJSON().features.length, 'onEachFeature should have been called twice');
+    });
+});
+
 test('csv', function (t) {
     t.plan(2);
     var layer = omnivore.csv('a.csv');
