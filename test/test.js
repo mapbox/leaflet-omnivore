@@ -126,6 +126,18 @@ test('csv.parse', function (t) {
     t.ok(lyr instanceof L.GeoJSON, 'produces layer');
 });
 
+test('csv options', function (t) {
+    t.plan(3);
+    var options = {
+        onEachFeature: function (feature, layer) {
+            t.pass('call the onEachFeature options');
+            t.ok(feature.geometry.type === 'Point', 'receive the correct feature geometry');
+            t.ok(feature.properties.name === 'Hello World', 'receive the correct feature property');
+        }
+    };
+    var layer = omnivore.csv('a.csv', options);
+});
+
 test('wkt.parse', function (t) {
     t.plan(1);
     var lyr = omnivore.wkt.parse('MultiPoint(20 20, 10 10, 30 30)');
