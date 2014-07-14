@@ -54,6 +54,7 @@ function geojsonLoad(url, options, customLayer) {
  */
 function topojsonLoad(url, options, customLayer) {
     var layer = customLayer || L.geoJson();
+    layer.options = options;
     xhr(url, onload);
     function onload(err, response) {
         if (err) return layer.fire('error', { error: err });
