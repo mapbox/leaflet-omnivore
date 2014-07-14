@@ -142,6 +142,11 @@ npm install
 npm run build
 ```
 
+`leaflet-omnivore.js` and `leaflet-omnivore.min.js` are **built files** generated
+from `index.js` by `browserify`. If you find an issue, it either needs to be
+fixed in `index.js`, or in one of the libraries leaflet-omnivore uses
+to parse formats.
+
 ## FAQ
 
 * **What if I just want one format?** Lucky for you, each format is specified
