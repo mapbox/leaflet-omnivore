@@ -195,7 +195,7 @@ function gpxParse(gpx, options, layer) {
 function kmlParse(gpx, options, layer) {
     var xml = parseXML(gpx);
     if (!xml) return layer.fire('error', {
-        error: 'Could not parse GPX'
+        error: 'Could not parse KML'
     });
     layer = layer || L.geoJson();
     var geojson = toGeoJSON.kml(xml);

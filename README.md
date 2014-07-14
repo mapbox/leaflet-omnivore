@@ -53,9 +53,11 @@ omnivore.topojson('a.topojson').addTo(map);
 omnivore.geojson('a.geojson').addTo(map);
 ```
 
-## api
+## API
 
-Arguments with `?` are optional.
+Arguments with `?` are optional. **parser_options** consists of options
+sent to the parser library, _not_ to the layer: if you want to provide options
+to the layer, see the example in the Custom Layers section.
 
 By default, the library will construct a `L.geoJson()` layer internally and
 call `.addData(geojson)` on it in order to load it full of GeoJSON. If you want
@@ -64,19 +66,19 @@ by passing it as `customLayer`, as long as it supports events and `addData()`.
 You can also use this API to pass custom options to a `L.geoJson()` instance.:
 
 
-* `.csv(url, options?, customLayer?)`: Load & parse CSV, and return layer. Options are the same as [csv2geojson](https://github.com/mapbox/csv2geojson#api): `latfield, lonfield, delimiter`
-* `.csv.parse(csvString, options?)`: Parse CSV, and return layer.
+* `.csv(url, parser_options?, customLayer?)`: Load & parse CSV, and return layer. Options are the same as [csv2geojson](https://github.com/mapbox/csv2geojson#api): `latfield, lonfield, delimiter`
+* `.csv.parse(csvString, parser_options?)`: Parse CSV, and return layer.
 * `.kml(url)`: Load & parse KML, and return layer.
 * `.kml.parse(kmlString | gpxDom)`: Parse KML from a string of XML or XML DOM, and return layer.
-* `.gpx(url, options?, customLayer?)`: Load & parse GPX, and return layer.
+* `.gpx(url, parser_options?, customLayer?)`: Load & parse GPX, and return layer.
 * `.gpx.parse(gpxString | gpxDom)`: Parse GPX from a string of XML or XML DOM, and return layer.
-* `.geojson(url, options?, customLayer?)`: Load GeoJSON file at URL, parse GeoJSON, and return layer.
-* `.wkt(url, options?, customLayer?)`: Load & parse WKT, and return layer.
+* `.geojson(url, parser_options?, customLayer?)`: Load GeoJSON file at URL, parse GeoJSON, and return layer.
+* `.wkt(url, parser_options?, customLayer?)`: Load & parse WKT, and return layer.
 * `.wkt.parse(wktString)`: Parse WKT, and return layer.
-* `.topojson(url, options?, customLayer?)`: Load & parse TopoJSON, and return layer.
+* `.topojson(url, parser_options?, customLayer?)`: Load & parse TopoJSON, and return layer.
 * `.topojson.parse(topojson)`: Parse TopoJSON (given as a string or object), and return layer.
 
-### custom layers
+### Custom Layers
 
 Passing custom options:
 
@@ -97,7 +99,7 @@ Using a `L.mapbox.featureLayer`:
 var layer = omnivore.gpx('a.gpx', null, L.mapbox.featureLayer());
 ```
 
-### async & events
+### Async & Events
 
 Each function returns an `L.geoJson` object. Functions that load from URLs
 are **asynchronous**, so they will **not** immediately expose accurate `.setGeoJSON()` functions.
