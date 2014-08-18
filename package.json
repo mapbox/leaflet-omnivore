@@ -31,6 +31,8 @@
     "maps",
     "gpx",
     "wkt",
+    "osm",
+    "polyline",
     "topojson",
     "format",
     "converter"
