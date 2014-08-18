@@ -3,7 +3,8 @@ node_js:
 - 0.10
 script:
 - npm install
-- npm run test-remote
+- npm run test-headless
+# - npm run test-remote
 env:
   global:
   - secure: VX3HisGiObjV+0HynREXxKn4qqMM7pMVKphMjSWCucAxSyV//xeFTaFvuDOqoX9nYAcsisfBweDSOaofiSBCgVprxF0rK4URoPFRdlF1vJHfjP3JXID5kZssSsXPtmSyzuRHjYUnsqu1csM4FQDx0GTI5iwQqsTjSzvByzwiQGc=
