@@ -1,3 +1,7 @@
+## 0.3.0
+
+* Includes [encoded polyline](https://developers.google.com/maps/documentation/utilities/polylinealgorithm) support.
+
 ## 0.2.0
 
 * Only includes the necessary parts of [TopoJSON](https://github.com/mbostock/topojson): less bytes,

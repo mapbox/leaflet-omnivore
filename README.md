@@ -14,6 +14,7 @@ It currently supports:
 * [KML](http://developers.google.com/kml/documentation/) (via [toGeoJSON](https://github.com/mapbox/togeojson))
 * [WKT](http://en.wikipedia.org/wiki/Well-known_text) (via [wellknown](https://github.com/mapbox/wellknown))
 * [TopoJSON](https://github.com/mbostock/topojson)
+* [Encoded Polylines](https://developers.google.com/maps/documentation/utilities/polylinealgorithm) via [polyline](https://github.com/mapbox/polyline)
 
 Omnivore also includes an AJAX library, [corslite](https://github.com/mapbox/corslite),
 so you can specify what you want to add to the map with just a URL.
@@ -51,6 +52,7 @@ omnivore.kml('a.kml').addTo(map);
 omnivore.wkt('a.wkt').addTo(map);
 omnivore.topojson('a.topojson').addTo(map);
 omnivore.geojson('a.geojson').addTo(map);
+omnivore.polyline('a.txt').addTo(map);
 ```
 
 ## API
@@ -77,6 +79,16 @@ You can also use this API to pass custom options to a `L.geoJson()` instance.:
 * `.wkt.parse(wktString)`: Parse WKT, and return layer.
 * `.topojson(url, parser_options?, customLayer?)`: Load & parse TopoJSON, and return layer.
 * `.topojson.parse(topojson)`: Parse TopoJSON (given as a string or object), and return layer.
+* `.polyline(url, parser_options?, customLayer?)`: Load & parse polyline, and return layer.
+* `.polyline.parse(txt, options, layer)`: Parse polyline (given as a string or object), and return layer.
+
+Valid options:
+
+#### polyline
+
+* `precision` will change how the polyline is interpreted. By default, the value
+  is 5. This is the [factor in the algorithm](https://developers.google.com/maps/documentation/utilities/polylinealgorithm),
+  by default 1e5, which is adjustable.
 
 ### Custom Layers
 

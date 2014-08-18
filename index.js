@@ -228,7 +228,8 @@ function kmlParse(gpx, options, layer) {
 
 function polylineParse(txt, options, layer) {
     layer = layer || L.geoJson();
-    var coords = polyline.decode(txt);
+    options = options || {};
+    var coords = polyline.decode(txt, options.precision);
     var geojson = { type: 'LineString', coordinates: [] };
     for (var i = 0; i < coords.length; i++) {
         // polyline returns coords in lat, lng order, so flip for geojson
