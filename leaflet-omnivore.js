@@ -2,8 +2,12 @@
 var xhr = _dereq_('corslite'),
     csv2geojson = _dereq_('csv2geojson'),
     wellknown = _dereq_('wellknown'),
+    polyline = _dereq_('polyline'),
     topojson = _dereq_('topojson/topojson.js'),
     toGeoJSON = _dereq_('togeojson');
+
+module.exports.polyline = polylineLoad;
+module.exports.polyline.parse = polylineParse;
 
 module.exports.geojson = geojsonLoad;
 
@@ -158,6 +162,25 @@ function wktLoad(url, options, customLayer) {
     return layer;
 }
 
+/**
+ * Load a polyline string into a layer and return the layer
+ *
+ * @param {string} url
+ * @param {object} options
+ * @param {object} customLayer
+ * @returns {object}
+ */
+function polylineLoad(url, options, customLayer) {
+    var layer = customLayer || L.geoJson();
+    xhr(url, onload);
+    function onload(err, response) {
+        if (err) return layer.fire('error', { error: err });
+        polylineParse(response.responseText, options, layer);
+        layer.fire('ready');
+    }
+    return layer;
+}
+
 function topojsonParse(data) {
     var o = typeof data === 'string' ?
         JSON.parse(data) : data;
@@ -204,6 +227,18 @@ function kmlParse(gpx, options, layer) {
     return layer;
 }
 
+function polylineParse(txt, options, layer) {
+    layer = layer || L.geoJson();
+    var coords = polyline.decode(txt);
+    var geojson = { type: 'LineString', coordinates: [] };
+    for (var i = 0; i < coords.length; i++) {
+        // polyline returns coords in lat, lng order, so flip for geojson
+        geojson.coordinates[i] = [coords[i][1], coords[i][0]];
+    }
+    addData(layer, geojson);
+    return layer;
+}
+
 function wktParse(wkt, options, layer) {
     layer = layer || L.geoJson();
     var geojson = wellknown(wkt);
@@ -219,7 +254,7 @@ function parseXML(str) {
     }
 }
 
-},{"corslite":5,"csv2geojson":6,"togeojson":9,"topojson/topojson.js":10,"wellknown":11}],2:[function(_dereq_,module,exports){
+},{"corslite":5,"csv2geojson":6,"polyline":9,"togeojson":10,"topojson/topojson.js":11,"wellknown":12}],2:[function(_dereq_,module,exports){
 
 },{}],3:[function(_dereq_,module,exports){
 module.exports=_dereq_(2)
@@ -590,6 +625,97 @@ module.exports = function(x, dims) {
 };
 
 },{}],9:[function(_dereq_,module,exports){
+var polyline = {};
+
+// Based off of [the offical Google document](https://developers.google.com/maps/documentation/utilities/polylinealgorithm)
+//
+// Some parts from [this implementation](http://facstaff.unca.edu/mcmcclur/GoogleMaps/EncodePolyline/PolylineEncoder.js)
+// by [Mark McClure](http://facstaff.unca.edu/mcmcclur/)
+
+function encode(coordinate, factor) {
+    coordinate = Math.round(coordinate * factor);
+    coordinate <<= 1;
+    if (coordinate < 0) {
+        coordinate = ~coordinate;
+    }
+    var output = '';
+    while (coordinate >= 0x20) {
+        output += String.fromCharCode((0x20 | (coordinate & 0x1f)) + 63);
+        coordinate >>= 5;
+    }
+    output += String.fromCharCode(coordinate + 63);
+    return output;
+}
+
+// This is adapted from the implementation in Project-OSRM
+// https://github.com/DennisOSRM/Project-OSRM-Web/blob/master/WebContent/routing/OSRM.RoutingGeometry.js
+polyline.decode = function(str, precision) {
+    var index = 0,
+        lat = 0,
+        lng = 0,
+        coordinates = [],
+        shift = 0,
+        result = 0,
+        byte = null,
+        latitude_change,
+        longitude_change,
+        factor = Math.pow(10, precision || 5);
+
+    // Coordinates have variable length when encoded, so just keep
+    // track of whether we've hit the end of the string. In each
+    // loop iteration, a single coordinate is decoded.
+    while (index < str.length) {
+
+        // Reset shift, result, and byte
+        byte = null;
+        shift = 0;
+        result = 0;
+
+        do {
+            byte = str.charCodeAt(index++) - 63;
+            result |= (byte & 0x1f) << shift;
+            shift += 5;
+        } while (byte >= 0x20);
+
+        latitude_change = ((result & 1) ? ~(result >> 1) : (result >> 1));
+
+        shift = result = 0;
+
+        do {
+            byte = str.charCodeAt(index++) - 63;
+            result |= (byte & 0x1f) << shift;
+            shift += 5;
+        } while (byte >= 0x20);
+
+        longitude_change = ((result & 1) ? ~(result >> 1) : (result >> 1));
+
+        lat += latitude_change;
+        lng += longitude_change;
+
+        coordinates.push([lat / factor, lng / factor]);
+    }
+
+    return coordinates;
+};
+
+polyline.encode = function(coordinates, precision) {
+    if (!coordinates.length) return '';
+
+    var factor = Math.pow(10, precision || 5),
+        output = encode(coordinates[0][0], factor) + encode(coordinates[0][1], factor);
+
+    for (var i = 1; i < coordinates.length; i++) {
+        var a = coordinates[i], b = coordinates[i - 1];
+        output += encode(a[0] - b[0], factor);
+        output += encode(a[1] - b[1], factor);
+    }
+
+    return output;
+};
+
+if (typeof module !== undefined) module.exports = polyline;
+
+},{}],10:[function(_dereq_,module,exports){
 (function (process){
 toGeoJSON = (function() {
     'use strict';
@@ -828,7 +954,7 @@ toGeoJSON = (function() {
 if (typeof module !== 'undefined') module.exports = toGeoJSON;
 
 }).call(this,_dereq_("FWaASH"))
-},{"FWaASH":4,"xmldom":3}],10:[function(_dereq_,module,exports){
+},{"FWaASH":4,"xmldom":3}],11:[function(_dereq_,module,exports){
 !function() {
   var topojson = {
     version: "1.6.8",
@@ -1362,7 +1488,7 @@ if (typeof module !== 'undefined') module.exports = toGeoJSON;
   else this.topojson = topojson;
 }();
 
-},{}],11:[function(_dereq_,module,exports){
+},{}],12:[function(_dereq_,module,exports){
 module.exports = parse;
 module.exports.parse = parse;
 module.exports.stringify = stringify;
