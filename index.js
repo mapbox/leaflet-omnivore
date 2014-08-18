@@ -1,8 +1,12 @@
 var xhr = require('corslite'),
     csv2geojson = require('csv2geojson'),
     wellknown = require('wellknown'),
+    polyline = require('polyline'),
     topojson = require('topojson/topojson.js'),
     toGeoJSON = require('togeojson');
+
+module.exports.polyline = polylineLoad;
+module.exports.polyline.parse = polylineParse;
 
 module.exports.geojson = geojsonLoad;
 
@@ -157,6 +161,25 @@ function wktLoad(url, options, customLayer) {
     return layer;
 }
 
+/**
+ * Load a polyline string into a layer and return the layer
+ *
+ * @param {string} url
+ * @param {object} options
+ * @param {object} customLayer
+ * @returns {object}
+ */
+function polylineLoad(url, options, customLayer) {
+    var layer = customLayer || L.geoJson();
+    xhr(url, onload);
+    function onload(err, response) {
+        if (err) return layer.fire('error', { error: err });
+        polylineParse(response.responseText, options, layer);
+        layer.fire('ready');
+    }
+    return layer;
+}
+
 function topojsonParse(data) {
     var o = typeof data === 'string' ?
         JSON.parse(data) : data;
@@ -199,6 +222,18 @@ function kmlParse(gpx, options, layer) {
     });
     layer = layer || L.geoJson();
     var geojson = toGeoJSON.kml(xml);
+    addData(layer, geojson);
+    return layer;
+}
+
+function polylineParse(txt, options, layer) {
+    layer = layer || L.geoJson();
+    var coords = polyline.decode(txt);
+    var geojson = { type: 'LineString', coordinates: [] };
+    for (var i = 0; i < coords.length; i++) {
+        // polyline returns coords in lat, lng order, so flip for geojson
+        geojson.coordinates[i] = [coords[i][1], coords[i][0]];
+    }
     addData(layer, geojson);
     return layer;
 }

@@ -45,7 +45,8 @@
     "togeojson": "~0.5.0",
     "corslite": "0.0.6",
     "wellknown": "0.2.0",
-    "topojson": "1.6.8"
+    "topojson": "1.6.8",
+    "polyline": "0.0.3"
   },
   "devDependencies": {
     "browserify": "4.1.10",

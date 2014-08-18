@@ -51,6 +51,13 @@ test('gpx', function (t) {
     });
 });
 
+test('polyilne.parse', function (t) {
+    t.plan(2);
+    var layer = omnivore.polyline.parse(fs.readFileSync('./test/a.polyline'));
+    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
+    t.equal(layer.toGeoJSON().features.length, 1);
+});
+
 test('gpx.parse', function (t) {
     t.plan(2);
     var layer = omnivore.gpx.parse(fs.readFileSync('./test/a.gpx'));
@@ -111,6 +118,18 @@ test('kml.parse', function (t) {
 test('csv', function (t) {
     t.plan(2);
     var layer = omnivore.csv('a.csv');
+    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
+    layer.on('ready', function() {
+        t.pass('fires ready event');
+    });
+    layer.on('error', function() {
+        t.fail('does not fire error event');
+    });
+});
+
+test('polyline', function (t) {
+    t.plan(2);
+    var layer = omnivore.polyline('a.polyline');
     t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
     layer.on('ready', function() {
         t.pass('fires ready event');
