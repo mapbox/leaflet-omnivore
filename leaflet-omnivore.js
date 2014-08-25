@@ -783,7 +783,7 @@ toGeoJSON = (function() {
     } else if (typeof exports === 'object' && typeof process === 'object' && !process.browser) {
         serializer = new (_dereq_('xmldom').XMLSerializer)();
     }
-    function xml2str(str) { return serializer.serializeToString(str); }
+    function xml2str(str) { return str.xml || serializer.serializeToString(str); }
 
     var t = {
         kml: function(doc, o) {
