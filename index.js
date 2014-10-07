@@ -61,7 +61,7 @@ function topojsonLoad(url, options, customLayer) {
     xhr(url, onload);
     function onload(err, response) {
         if (err) return layer.fire('error', { error: err });
-        addData(layer, topojsonParse(response.responseText));
+        topojsonParse(response.responseText, options, layer);
         layer.fire('ready');
     }
     return layer;
@@ -180,16 +180,16 @@ function polylineLoad(url, options, customLayer) {
     return layer;
 }
 
-function topojsonParse(data) {
+function topojsonParse(data, options, layer) {
     var o = typeof data === 'string' ?
         JSON.parse(data) : data;
-    var features = [];
+    layer = layer || L.geoJson();
     for (var i in o.objects) {
         var ft = topojson.feature(o, o.objects[i]);
-        if (ft.features) features = features.concat(ft.features);
-        else features = features.concat([ft]);
+        if (ft.features) addData(layer, ft.features);
+        else addData(layer, ft);
     }
-    return features;
+    return layer;
 }
 
 function csvParse(csv, options, layer) {
