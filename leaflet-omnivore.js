@@ -62,7 +62,7 @@ function topojsonLoad(url, options, customLayer) {
     xhr(url, onload);
     function onload(err, response) {
         if (err) return layer.fire('error', { error: err });
-        addData(layer, topojsonParse(response.responseText));
+        topojsonParse(response.responseText, options, layer);
         layer.fire('ready');
     }
     return layer;
@@ -181,16 +181,16 @@ function polylineLoad(url, options, customLayer) {
     return layer;
 }
 
-function topojsonParse(data) {
+function topojsonParse(data, options, layer) {
     var o = typeof data === 'string' ?
         JSON.parse(data) : data;
-    var features = [];
+    layer = layer || L.geoJson();
     for (var i in o.objects) {
         var ft = topojson.feature(o, o.objects[i]);
-        if (ft.features) features = features.concat(ft.features);
-        else features = features.concat([ft]);
+        if (ft.features) addData(layer, ft.features);
+        else addData(layer, ft);
     }
-    return features;
+    return layer;
 }
 
 function csvParse(csv, options, layer) {
@@ -229,7 +229,8 @@ function kmlParse(gpx, options, layer) {
 
 function polylineParse(txt, options, layer) {
     layer = layer || L.geoJson();
-    var coords = polyline.decode(txt);
+    options = options || {};
+    var coords = polyline.decode(txt, options.precision);
     var geojson = { type: 'LineString', coordinates: [] };
     for (var i = 0; i < coords.length; i++) {
         // polyline returns coords in lat, lng order, so flip for geojson
