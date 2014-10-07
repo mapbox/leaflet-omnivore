@@ -175,6 +175,12 @@ test('topojson', function (t) {
     });
 });
 
+test('topojson.parse', function (t) {
+    t.plan(1);
+    var lyr = omnivore.topojson.parse(fs.readFileSync('./test/a.topojson'));
+    t.ok(lyr instanceof L.GeoJSON, 'produces geojson layer');
+});
+
 test('geojson', function (t) {
     t.plan(2);
     var layer = omnivore.geojson('a.geojson');
