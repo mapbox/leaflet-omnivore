@@ -105,6 +105,19 @@ var customLayer = L.geoJson(null, {
 var myLayer = omnivore.csv('foo', null, customLayer);
 ```
 
+Adding custom styles to a GeoJSON layer:
+
+```js
+var customLayer = L.geoJson(null, {
+    // http://leafletjs.com/reference.html#geojson-style
+    style: function(feature) {
+        return { color: '#f00' };
+    }
+});
+// this can be any kind of omnivore layer
+var runLayer = omnivore.kml('line.kml', null, customLayer)
+```
+
 Using a `L.mapbox.featureLayer`:
 
 ```js
