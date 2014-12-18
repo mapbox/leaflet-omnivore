@@ -1,3 +1,8 @@
+## 0.3.1
+
+* Updates [wellknown](https://github.com/mapbox/wellknown) to 0.3.0 with exponent coordinate support
+* Updates [togeojson](https://github.com/mapbox/togeojson) to 0.10.1 with timestamp, ie9 feature id, gx:Track, gx:MultiTrack support
+
 ## 0.3.0
 
 * Includes [encoded polyline](https://developers.google.com/maps/documentation/utilities/polylinealgorithm) support.
