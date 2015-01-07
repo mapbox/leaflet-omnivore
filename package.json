@@ -48,12 +48,13 @@
     "togeojson": "0.10.1",
     "corslite": "0.0.6",
     "wellknown": "0.3.0",
+    "hintify": "~0.1.0",
+    "brfs": "0.2.1",
     "topojson": "1.6.8",
     "polyline": "0.0.3"
   },
   "devDependencies": {
     "browserify": "7.0.2",
-    "brfs": "0.2.1",
     "tape": "2.4.2",
     "uglify-js": "2.4.16",
     "jshint": "2.5.0",
@@ -61,7 +62,6 @@
     "zuul": "~1.7.0",
     "st": "0.5.1",
     "mapbox.js": "1.6.4",
-    "hintify": "~0.1.0",
     "phantomjs": "~1.9.7-15"
   }
 }

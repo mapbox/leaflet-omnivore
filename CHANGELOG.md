@@ -1,3 +1,7 @@
+## 0.3.2
+
+* Move `brfs` and `hintify` to dependencies.
+
 ## 0.3.1
 
 * Updates [wellknown](https://github.com/mapbox/wellknown) to 0.3.0 with exponent coordinate support
