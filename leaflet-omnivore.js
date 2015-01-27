@@ -496,7 +496,8 @@ function csv2geojson(x, options, callback) {
     options.delimiter = options.delimiter || ',';
 
     var latfield = options.latfield || '',
-        lonfield = options.lonfield || '';
+        lonfield = options.lonfield || '',
+        crs = options.crs || '';
 
     var features = [],
         featurecollection = { type: 'FeatureCollection', features: features };
@@ -548,6 +549,11 @@ function csv2geojson(x, options, callback) {
 
             lonf = parseFloat(lonk);
             latf = parseFloat(latk);
+            
+            var CRS = [];
+            if (crs !='') {
+                CRS = { type: 'name', properties: { name: crs } };
+            }
 
             if (isNaN(lonf) ||
                 isNaN(latf)) {
@@ -570,7 +576,8 @@ function csv2geojson(x, options, callback) {
                             parseFloat(lonf),
                             parseFloat(latf)
                         ]
-                    }
+                    },
+                    crs: CRS
                 });
             }
         }
