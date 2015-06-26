@@ -45,7 +45,7 @@
   "homepage": "https://github.com/mapbox/leaflet-omnivore",
   "dependencies": {
     "csv2geojson": "~3.6.1",
-    "togeojson": "0.10.1",
+    "togeojson": "0.11.1",
     "corslite": "0.0.6",
     "wellknown": "0.3.0",
     "hintify": "~0.1.0",
