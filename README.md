@@ -43,7 +43,7 @@ Live examples:
 * [CSV](https://www.mapbox.com/mapbox.js/example/v1.0.0/markers-from-csv/)
 
 ```js
-var map = L.mapbox.map('map', 'examples.map-9ijuk24y')
+var map = L.mapbox.map('map', 'mapbox.streets')
     .setView([38, -102.0], 5);
 
 omnivore.csv('a.csv').addTo(map);
