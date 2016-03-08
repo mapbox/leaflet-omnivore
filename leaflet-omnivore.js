@@ -534,7 +534,7 @@ function csv2geojson(x, options, callback) {
 
     for (var i = 0; i < parsed.length; i++) {
         if (parsed[i][lonfield] !== undefined &&
-            parsed[i][lonfield] !== undefined) {
+            parsed[i][lonfield] !== "") {
 
             var lonk = parsed[i][lonfield],
                 latk = parsed[i][latfield],
