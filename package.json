@@ -15,8 +15,7 @@
   },
   "browserify": {
     "transform": [
-      "brfs",
-      "hintify"
+      "brfs"
     ]
   },
   "keywords": [
@@ -48,7 +47,6 @@
     "togeojson": "0.11.1",
     "corslite": "0.0.6",
     "wellknown": "0.3.0",
-    "hintify": "~0.1.0",
     "brfs": "0.2.1",
     "topojson": "1.6.8",
     "polyline": "0.0.3"
