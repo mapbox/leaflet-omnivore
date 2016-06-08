@@ -6,7 +6,7 @@ var test = require('tape'),
 
 test('gpx-featureLayer', function (t) {
     function customFilter() { return true; }
-    var l = L.mapbox.markerLayer();
+    var l = L.mapbox.featureLayer();
     var layer = omnivore.gpx('a.gpx', null, l);
 
     t.ok('setFilter' in layer, 'uses a featureLayer');
@@ -51,16 +51,16 @@ test('gpx', function (t) {
     });
 });
 
-test('polyilne.parse', function (t) {
+test('polyline.parse', function (t) {
     t.plan(2);
-    var layer = omnivore.polyline.parse(fs.readFileSync('./test/a.polyline'));
+    var layer = omnivore.polyline.parse(fs.readFileSync('./test/a.polyline', 'utf8'));
     t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
     t.equal(layer.toGeoJSON().features.length, 1);
 });
 
 test('gpx.parse', function (t) {
     t.plan(2);
-    var layer = omnivore.gpx.parse(fs.readFileSync('./test/a.gpx'));
+    var layer = omnivore.gpx.parse(fs.readFileSync('./test/a.gpx', 'utf8'));
     t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
     t.equal(layer.toGeoJSON().features.length, 1);
 });
@@ -110,7 +110,7 @@ test('kml', function (t) {
 
 test('kml.parse', function (t) {
     t.plan(2);
-    var layer = omnivore.kml.parse(fs.readFileSync('./test/a.kml'));
+    var layer = omnivore.kml.parse(fs.readFileSync('./test/a.kml', 'utf8'));
     t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
     t.equal(layer.toGeoJSON().features.length, 2);
 });
@@ -177,7 +177,7 @@ test('topojson', function (t) {
 
 test('topojson.parse', function (t) {
     t.plan(1);
-    var lyr = omnivore.topojson.parse(fs.readFileSync('./test/a.topojson'));
+    var lyr = omnivore.topojson.parse(fs.readFileSync('./test/a.topojson', 'utf8'));
     t.ok(lyr instanceof L.GeoJSON, 'produces geojson layer');
 });
 
