@@ -37,7 +37,7 @@
     "converter"
   ],
   "author": "Tom MacWright",
-  "license": "BSD",
+  "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/mapbox/leaflet-omnivore/issues"
   },
