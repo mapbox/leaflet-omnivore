@@ -1016,6 +1016,9 @@ toGeoJSON = (function() {
                 var segments = get(node, 'trkseg'), track = [], times = [], line;
                 for (var i = 0; i < segments.length; i++) {
                     line = getPoints(segments[i], 'trkpt');
+                    if (!line) {
+                        continue;
+                    }
                     if (line.line) track.push(line.line);
                     if (line.times.length) times.push(line.times);
                 }
