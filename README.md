@@ -1,11 +1,10 @@
-[![Build Status](https://travis-ci.org/mapbox/leaflet-omnivore.svg)](https://travis-ci.org/mapbox/leaflet-omnivore)
+[![Circle CI](https://circleci.com/gh/fuzhenn/maptalks.formats.svg?style=shield)](https://circleci.com/gh/fuzhenn/maptalks.formats)
 
-# leaflet-omnivore
+# maptalks.formats
 
-![](https://farm8.staticflickr.com/7373/12376158164_e335b4e61d_b.jpg)
+This is a work based on [leaflet-omnivore](https://github.com/mapbox/leaflet-omnivore). All credits go to it.
 
-[Leaflet](http://leafletjs.com/) supports the [GeoJSON](http://geojson.org/) format
-by default. What if you have something else? That's where omnivore comes in.
+A maptalks.js's plugin for geographic data format supports.
 
 It currently supports:
 
@@ -16,43 +15,31 @@ It currently supports:
 * [TopoJSON](https://github.com/mbostock/topojson)
 * [Encoded Polylines](https://developers.google.com/maps/documentation/utilities/polylinealgorithm) via [polyline](https://github.com/mapbox/polyline)
 
-Omnivore also includes an AJAX library, [corslite](https://github.com/mapbox/corslite),
+It also includes an AJAX library, [corslite](https://github.com/mapbox/corslite),
 so you can specify what you want to add to the map with just a URL.
 
 ## Installation
 
-use it easily with the [Mapbox Plugins CDN](http://mapbox.com/mapbox.js/plugins/#leaflet-omnivore):
+download `leaflet-omnivore.min.js` from this repository.
 
-```html
-<script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.3.1/leaflet-omnivore.min.js'></script>
+or
+
 ```
-
-
-Or download `leaflet-omnivore.min.js` from this repository.
+npm install maptalks.formats --save
+```
 
 ## example
 
-Live examples:
-
-* [WKT](https://www.mapbox.com/mapbox.js/example/v1.0.0/omnivore-wkt/)
-* [TopoJSON](https://www.mapbox.com/mapbox.js/example/v1.0.0/omnivore-topojson/)
-* [Tooltips](https://www.mapbox.com/mapbox.js/example/v1.0.0/omnivore-kml-tooltip/)
-* [KML](https://www.mapbox.com/mapbox.js/example/v1.0.0/omnivore-kml/)
-* [GPX](https://www.mapbox.com/mapbox.js/example/v1.0.0/omnivore-gpx/)
-* [Icons](https://www.mapbox.com/mapbox.js/example/v1.0.0/markers-from-csv-custom-style/)
-* [CSV](https://www.mapbox.com/mapbox.js/example/v1.0.0/markers-from-csv/)
-
 ```js
-var map = L.mapbox.map('map', 'mapbox.streets')
-    .setView([38, -102.0], 5);
+var map = new maptalks.Map('map', ...);
 
-omnivore.csv('a.csv').addTo(map);
-omnivore.gpx('a.gpx').addTo(map);
-omnivore.kml('a.kml').addTo(map);
-omnivore.wkt('a.wkt').addTo(map);
-omnivore.topojson('a.topojson').addTo(map);
-omnivore.geojson('a.geojson').addTo(map);
-omnivore.polyline('a.txt').addTo(map);
+maptalks.Formats.csv('a.csv').addTo(map);
+maptalks.Formats.gpx('a.gpx').addTo(map);
+maptalks.Formats.kml('a.kml').addTo(map);
+maptalks.Formats.wkt('a.wkt').addTo(map);
+maptalks.Formats.topojson('a.topojson').addTo(map);
+maptalks.Formats.geojson('a.geojson').addTo(map);
+maptalks.Formats.polyline('a.txt').addTo(map);
 ```
 
 ## API
@@ -61,11 +48,8 @@ Arguments with `?` are optional. **parser_options** consists of options
 sent to the parser library, _not_ to the layer: if you want to provide options
 to the layer, see the example in the Custom Layers section.
 
-By default, the library will construct a `L.geoJson()` layer internally and
-call `.addData(geojson)` on it in order to load it full of GeoJSON. If you want
-to use a different kind of layer, like a `L.mapbox.featureLayer()`, you can,
-by passing it as `customLayer`, as long as it supports events and `addData()`.
-You can also use this API to pass custom options to a `L.geoJson()` instance.:
+By default, the library will construct a `maptalks.GeoJSONLayer` layer internally and
+call `.addData(geojson)` on it in order to load it full of GeoJSON. :
 
 
 * `.csv(url, parser_options?, customLayer?)`: Load & parse CSV, and return layer. Options are the same as [csv2geojson](https://github.com/mapbox/csv2geojson#api): `latfield, lonfield, delimiter`
@@ -90,44 +74,11 @@ Valid options:
   is 5. This is the [factor in the algorithm](https://developers.google.com/maps/documentation/utilities/polylinealgorithm),
   by default 1e5, which is adjustable.
 
-### Custom Layers
-
-Passing custom options:
-
-```js
-var customLayer = L.geoJson(null, {
-    filter: function() {
-        // my custom filter function
-        return true;
-    }
-});
-
-var myLayer = omnivore.csv('foo', null, customLayer);
-```
-
-Adding custom styles to a GeoJSON layer:
-
-```js
-var customLayer = L.geoJson(null, {
-    // http://leafletjs.com/reference.html#geojson-style
-    style: function(feature) {
-        return { color: '#f00' };
-    }
-});
-// this can be any kind of omnivore layer
-var runLayer = omnivore.kml('line.kml', null, customLayer)
-```
-
-Using a `L.mapbox.featureLayer`:
-
-```js
-var layer = omnivore.gpx('a.gpx', null, L.mapbox.featureLayer());
-```
 
 ### Async & Events
 
-Each function returns an `L.geoJson` object. Functions that load from URLs
-are **asynchronous**, so they will **not** immediately expose accurate `.setGeoJSON()` functions.
+Each function returns an `maptalks.GeoJSONLayer` object. Functions that load from URLs
+are **asynchronous**, so they will **not** be immediately loaded.
 
 For this reason, we fire events:
 
@@ -135,7 +86,7 @@ For this reason, we fire events:
 * `error`: fired if data can't be loaded or parsed
 
 ```js
-var layer = omnivore.gpx('a.gpx')
+var layer = maptalks.Formats.gpx('a.gpx')
     .on('ready', function() {
         // when this is fired, the layer
         // is done being initialized
@@ -156,18 +107,18 @@ after the call.
 This is a [browserify](http://browserify.org/) project:
 
 ```sh
-git clone git@github.com:mapbox/leaflet-omnivore.git
+git clone git@github.com:maptalks/maptalks.formats.git
 
-cd leaflet-omnivore
+cd maptalks.formats
 
 # to run tests
 npm install
 
-# to build leaflet-omnivore.js
+# to build maptalks.formats.js
 npm run build
 ```
 
-`leaflet-omnivore.js` and `leaflet-omnivore.min.js` are **built files** generated
+`maptalks.formats.js` and `maptalks.formats.min.js` are **built files** generated
 from `index.js` by `browserify`. If you find an issue, it either needs to be
 fixed in `index.js`, or in one of the libraries leaflet-omnivore uses
 to parse formats.
