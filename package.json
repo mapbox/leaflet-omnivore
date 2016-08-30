@@ -1,17 +1,17 @@
 {
-  "name": "leaflet-omnivore",
-  "version": "0.3.2",
-  "description": "a geospatial format parser for Leaflet",
+  "name": "maptalks.formats",
+  "version": "0.1.0",
+  "description": "a geospatial format parser for Maptalks",
   "main": "index.js",
   "scripts": {
-    "test": "zuul --local -- test/test.js",
+    "test-local": "zuul --local -- test/test.js",
     "test-remote": "zuul -- test/test.js",
-    "test-headless": "zuul --phantom test/test.js",
-    "build": "browserify -s omnivore index.js > leaflet-omnivore.js && uglifyjs leaflet-omnivore.js -c -m > leaflet-omnivore.min.js"
+    "test": "zuul --phantom -- test/test.js",
+    "build": "browserify --external maptalks index.js > maptalks.formats.js && uglifyjs maptalks.formats.js -c -m > maptalks.formats.min.js"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:mapbox/leaflet-omnivore.git"
+    "url": "git@github.com:maptalks/maptalks.formats.git"
   },
   "browserify": {
     "transform": [
@@ -19,14 +19,13 @@
     ]
   },
   "keywords": [
-    "leaflet",
+    "maptalks",
     "formats",
     "kml",
     "csv",
     "gpx",
     "geojson",
     "kml",
-    "leaflet",
     "maps",
     "gpx",
     "wkt",
@@ -36,30 +35,33 @@
     "format",
     "converter"
   ],
-  "author": "Tom MacWright",
+  "author": [
+    "Tom MacWright",
+    "Fu Zhen"
+  ],
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/mapbox/leaflet-omnivore/issues"
+    "url": "https://github.com/maptalks/maptalks.formats/issues"
   },
-  "homepage": "https://github.com/mapbox/leaflet-omnivore",
+  "homepage": "https://github.com/maptalks/maptalks.formats",
   "dependencies": {
-    "csv2geojson": "~5.0.0",
-    "togeojson": "0.13.0",
-    "corslite": "0.0.7",
-    "wellknown": "0.4.2",
     "brfs": "1.4.3",
+    "corslite": "0.0.7",
+    "csv2geojson": "~5.0.0",
+    "polyline": "0.2.0",
+    "togeojson": "0.13.0",
     "topojson": "1.6.26",
-    "polyline": "0.2.0"
+    "wellknown": "0.4.2"
   },
   "devDependencies": {
     "browserify": "13.0.1",
+    "eslint": "^3.4.0",
+    "maptalks": "<2.0.0",
+    "mocha": "~2.5.3",
+    "phantomjs-prebuilt": "2.1.7",
+    "st": "1.1.0",
     "tape": "4.5.1",
     "uglify-js": "^2.6.2",
-    "jshint": "2.9.2",
-    "mocha": "~2.5.3",
-    "zuul": "~3.10.1",
-    "st": "1.1.0",
-    "mapbox.js": "2.4.0",
-    "phantomjs-prebuilt": "2.1.7"
+    "zuul": "~3.10.1"
   }
 }

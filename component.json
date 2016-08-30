@@ -1,8 +1,0 @@
-{
-  "name": "leaflet-omnivore",
-  "version": "0.2.0",
-  "description": "a geospatial format parser for Leaflet",
-  "scripts": [
-    "leaflet-omnivore.js"
-  ]
-}

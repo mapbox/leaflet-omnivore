@@ -1,18 +1,18 @@
-require('mapbox.js');
+require('maptalks');
+require('../');
 
 var test = require('tape'),
-    fs = require('fs'),
-    omnivore = require('../');
+    fs = require('fs');
+
+var uid = 0;
 
 test('gpx-featureLayer', function (t) {
     function customFilter() { return true; }
-    var l = L.mapbox.featureLayer();
-    var layer = omnivore.gpx('a.gpx', null, l);
+    var l = new maptalks.GeoJSONLayer(uid++);
+    var layer = maptalks.Formats.gpx('a.gpx', null, l);
 
-    t.ok('setFilter' in layer, 'uses a featureLayer');
     layer.on('ready', function() {
         t.pass('fires ready event');
-        t.ok('setFilter' in layer, 'uses a featureLayer');
         t.end();
     });
     layer.on('error', function() {
@@ -23,14 +23,11 @@ test('gpx-featureLayer', function (t) {
 
 test('gpx-customLayer', function (t) {
     function customFilter() { return true; }
-    var l = L.geoJson(null, {
-        filter: customFilter
-    });
-    var layer = omnivore.gpx('a.gpx', null, l);
-    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
+    var l = new maptalks.GeoJSONLayer(uid++);
+    var layer = maptalks.Formats.gpx('a.gpx', null, l);
+    t.ok(layer instanceof maptalks.GeoJSONLayer, 'produces geojson layer');
     layer.on('ready', function() {
         t.pass('fires ready event');
-        t.equal(layer.options.filter, customFilter, 'uses a customLayer');
         t.end();
     });
     layer.on('error', function() {
@@ -41,8 +38,8 @@ test('gpx-customLayer', function (t) {
 
 test('gpx', function (t) {
     t.plan(2);
-    var layer = omnivore.gpx('a.gpx');
-    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
+    var layer = maptalks.Formats.gpx('a.gpx');
+    t.ok(layer instanceof maptalks.GeoJSONLayer, 'produces geojson layer');
     layer.on('ready', function() {
         t.pass('fires ready event');
     });
@@ -53,22 +50,22 @@ test('gpx', function (t) {
 
 test('polyline.parse', function (t) {
     t.plan(2);
-    var layer = omnivore.polyline.parse(fs.readFileSync('./test/a.polyline', 'utf8'));
-    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
-    t.equal(layer.toGeoJSON().features.length, 1);
+    var layer = maptalks.Formats.polyline.parse(fs.readFileSync('./test/a.polyline', 'utf8'));
+    t.ok(layer instanceof maptalks.GeoJSONLayer, 'produces geojson layer');
+    t.equal(layer.getGeometries().length, 1);
 });
 
 test('gpx.parse', function (t) {
     t.plan(2);
-    var layer = omnivore.gpx.parse(fs.readFileSync('./test/a.gpx', 'utf8'));
-    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
-    t.equal(layer.toGeoJSON().features.length, 1);
+    var layer = maptalks.Formats.gpx.parse(fs.readFileSync('./test/a.gpx', 'utf8'));
+    t.ok(layer instanceof maptalks.GeoJSONLayer, 'produces geojson layer');
+    t.equal(layer.getGeometries().length, 1);
 });
 
 test('csv fail', function (t) {
     t.plan(4);
-    var layer = omnivore.csv('a.gpx');
-    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
+    var layer = maptalks.Formats.csv('a.gpx');
+    t.ok(layer instanceof maptalks.GeoJSONLayer, 'produces geojson layer');
     layer.on('ready', function() {
         t.fail('fires ready event');
     });
@@ -81,14 +78,14 @@ test('csv fail', function (t) {
 
 test('csv options', function (t) {
     t.plan(2);
-    var layer = omnivore.csv('options.csv', {
+    var layer = maptalks.Formats.csv('options.csv', {
         latfield: 'a',
         lonfield: 'b'
     });
     layer.on('ready', function() {
         t.pass('fires ready event');
         t.deepEqual(
-            layer.toGeoJSON().features[0].geometry.coordinates,
+            layer.getGeometries()[0].getCoordinates().toArray(),
             [10, 20], 'parses coordinates');
     });
     layer.on('error', function() {
@@ -98,8 +95,8 @@ test('csv options', function (t) {
 
 test('kml', function (t) {
     t.plan(2);
-    var layer = omnivore.kml('a.kml');
-    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
+    var layer = maptalks.Formats.kml('a.kml');
+    t.ok(layer instanceof maptalks.GeoJSONLayer, 'produces geojson layer');
     layer.on('ready', function() {
         t.pass('fires ready event');
     });
@@ -110,15 +107,15 @@ test('kml', function (t) {
 
 test('kml.parse', function (t) {
     t.plan(2);
-    var layer = omnivore.kml.parse(fs.readFileSync('./test/a.kml', 'utf8'));
-    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
-    t.equal(layer.toGeoJSON().features.length, 2);
+    var layer = maptalks.Formats.kml.parse(fs.readFileSync('./test/a.kml', 'utf8'));
+    t.ok(layer instanceof maptalks.GeoJSONLayer, 'produces geojson layer');
+    t.equal(layer.getGeometries().length, 2);
 });
 
 test('csv', function (t) {
     t.plan(2);
-    var layer = omnivore.csv('a.csv');
-    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
+    var layer = maptalks.Formats.csv('a.csv');
+    t.ok(layer instanceof maptalks.GeoJSONLayer, 'produces geojson layer');
     layer.on('ready', function() {
         t.pass('fires ready event');
     });
@@ -129,8 +126,8 @@ test('csv', function (t) {
 
 test('polyline', function (t) {
     t.plan(2);
-    var layer = omnivore.polyline('a.polyline');
-    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
+    var layer = maptalks.Formats.polyline('a.polyline');
+    t.ok(layer instanceof maptalks.GeoJSONLayer, 'produces geojson layer');
     layer.on('ready', function() {
         t.pass('fires ready event');
     });
@@ -141,20 +138,20 @@ test('polyline', function (t) {
 
 test('csv.parse', function (t) {
     t.plan(1);
-    var lyr = omnivore.csv.parse('lat,lon,title\n0,0,"Hello"');
-    t.ok(lyr instanceof L.GeoJSON, 'produces layer');
+    var lyr = maptalks.Formats.csv.parse('lat,lon,title\n0,0,"Hello"');
+    t.ok(lyr instanceof maptalks.GeoJSONLayer, 'produces layer');
 });
 
 test('wkt.parse', function (t) {
     t.plan(1);
-    var lyr = omnivore.wkt.parse('MultiPoint(20 20, 10 10, 30 30)');
-    t.ok(lyr instanceof L.GeoJSON, 'produces layer');
+    var lyr = maptalks.Formats.wkt.parse('MultiPoint(20 20, 10 10, 30 30)');
+    t.ok(lyr instanceof maptalks.GeoJSONLayer, 'produces layer');
 });
 
 test('wkt', function (t) {
     t.plan(2);
-    var layer = omnivore.wkt('a.wkt');
-    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
+    var layer = maptalks.Formats.wkt('a.wkt');
+    t.ok(layer instanceof maptalks.GeoJSONLayer, 'produces geojson layer');
     layer.on('ready', function() {
         t.pass('fires ready event');
     });
@@ -165,8 +162,8 @@ test('wkt', function (t) {
 
 test('topojson', function (t) {
     t.plan(2);
-    var layer = omnivore.topojson('a.topojson');
-    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
+    var layer = maptalks.Formats.topojson('a.topojson');
+    t.ok(layer instanceof maptalks.GeoJSONLayer, 'produces geojson layer');
     layer.on('ready', function() {
         t.pass('fires ready event');
     });
@@ -177,14 +174,14 @@ test('topojson', function (t) {
 
 test('topojson.parse', function (t) {
     t.plan(1);
-    var lyr = omnivore.topojson.parse(fs.readFileSync('./test/a.topojson', 'utf8'));
-    t.ok(lyr instanceof L.GeoJSON, 'produces geojson layer');
+    var lyr = maptalks.Formats.topojson.parse(fs.readFileSync('./test/a.topojson', 'utf8'));
+    t.ok(lyr instanceof maptalks.GeoJSONLayer, 'produces geojson layer');
 });
 
 test('geojson', function (t) {
     t.plan(2);
-    var layer = omnivore.geojson('a.geojson');
-    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
+    var layer = maptalks.Formats.geojson('a.geojson');
+    t.ok(layer instanceof maptalks.GeoJSONLayer, 'produces geojson layer');
     layer.on('ready', function() {
         t.pass('fires ready event');
     });
@@ -195,8 +192,8 @@ test('geojson', function (t) {
 
 test('geojson: fail', function (t) {
     t.plan(2);
-    var layer = omnivore.geojson('404 does not exist');
-    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
+    var layer = maptalks.Formats.geojson('404 does not exist');
+    t.ok(layer instanceof maptalks.GeoJSONLayer, 'produces geojson layer');
     layer.on('ready', function() {
         t.fail('fires ready event');
     });
