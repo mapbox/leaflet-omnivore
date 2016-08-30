@@ -6,7 +6,7 @@
   "scripts": {
     "test": "zuul --local -- test/test.js",
     "test-remote": "zuul -- test/test.js",
-    "test-headless": "zuul --phantom test/test.js",
+    "test-headless": "zuul --phantom -- test/test.js",
     "build": "browserify -s omnivore index.js > leaflet-omnivore.js && uglifyjs leaflet-omnivore.js -c -m > leaflet-omnivore.min.js"
   },
   "repository": {
