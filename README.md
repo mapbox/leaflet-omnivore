@@ -20,7 +20,7 @@ so you can specify what you want to add to the map with just a URL.
 
 ## Installation
 
-download `leaflet-omnivore.min.js` from this repository.
+download `maptalks.formats.min.js` from this repository.
 
 or
 
