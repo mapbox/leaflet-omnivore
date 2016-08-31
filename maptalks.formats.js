@@ -47,7 +47,7 @@ function geojsonLoad(url, options, customLayer) {
     xhr(url, function(err, response) {
         if (err) return layer.fire('error', { error: err });
         addData(layer, JSON.parse(response.responseText));
-        layer.fire('ready');
+        layer.fire('ready', {'data' : response.responseText});
     });
     return layer;
 }
@@ -66,7 +66,7 @@ function topojsonLoad(url, options, customLayer) {
     function onload(err, response) {
         if (err) return layer.fire('error', { error: err });
         topojsonParse(response.responseText, options, layer);
-        layer.fire('ready');
+        layer.fire('ready', {'data' : response.responseText});
     }
     return layer;
 }
@@ -91,7 +91,7 @@ function csvLoad(url, options, customLayer) {
         layer.on('error', avoidReady);
         csvParse(response.responseText, options, layer);
         layer.off('error', avoidReady);
-        if (!error) layer.fire('ready');
+        if (!error) layer.fire('ready', {'data' : response.responseText});
     }
     return layer;
 }
@@ -116,7 +116,7 @@ function gpxLoad(url, options, customLayer) {
         layer.on('error', avoidReady);
         gpxParse(response.responseXML || response.responseText, options, layer);
         layer.off('error', avoidReady);
-        if (!error) layer.fire('ready');
+        if (!error) layer.fire('ready', {'data' : response.responseXML || response.responseText});
     }
     return layer;
 }
@@ -141,7 +141,7 @@ function kmlLoad(url, options, customLayer) {
         layer.on('error', avoidReady);
         kmlParse(response.responseXML || response.responseText, options, layer);
         layer.off('error', avoidReady);
-        if (!error) layer.fire('ready');
+        if (!error) layer.fire('ready', {'data' : response.responseXML || response.responseText});
     }
     return layer;
 }
@@ -160,7 +160,7 @@ function wktLoad(url, options, customLayer) {
     function onload(err, response) {
         if (err) return layer.fire('error', { error: err });
         wktParse(response.responseText, options, layer);
-        layer.fire('ready');
+        layer.fire('ready', {'data' : response.responseText});
     }
     return layer;
 }
@@ -179,7 +179,7 @@ function polylineLoad(url, options, customLayer) {
     function onload(err, response) {
         if (err) return layer.fire('error', { error: err });
         polylineParse(response.responseText, options, layer);
-        layer.fire('ready');
+        layer.fire('ready', {'data' : response.responseText});
     }
     return layer;
 }
@@ -600,7 +600,7 @@ function csv2geojson(x, options, callback) {
         });
     }
 
-    var parsed = (typeof x == 'string') ? 
+    var parsed = (typeof x == 'string') ?
         dsv.dsv(options.delimiter).parse(x) : x;
 
     if (!parsed.length) return callback(null, featurecollection);
