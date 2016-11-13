@@ -356,11 +356,31 @@ function corslite(url, callback, cors) {
 if (typeof module !== 'undefined') module.exports = corslite;
 
 },{}],4:[function(require,module,exports){
+'use strict';
+
 var dsv = require('d3-dsv'),
     sexagesimal = require('sexagesimal');
 
-function isLat(f) { return !!f.match(/(Lat)(itude)?/gi); }
-function isLon(f) { return !!f.match(/(L)(on|ng)(gitude)?/i); }
+var latRegex = /(Lat)(itude)?/gi,
+    lonRegex = /(L)(on|ng)(gitude)?/i;
+
+function guessHeader(row, regexp) {
+    var name, match, score;
+    for (var f in row) {
+        match = f.match(regexp);
+        if (match && (!name || match[0].length / f.length > score)) {
+            score = match[0].length / f.length;
+            name = f;
+        }
+    }
+    return name;
+}
+
+function guessLatHeader(row) { return guessHeader(row, latRegex); }
+function guessLonHeader(row) { return guessHeader(row, lonRegex); }
+
+function isLat(f) { return !!f.match(latRegex); }
+function isLon(f) { return !!f.match(lonRegex); }
 
 function keyCount(o) {
     return (typeof o == 'object') ? Object.keys(o).length : 0;
@@ -370,8 +390,8 @@ function autoDelimiter(x) {
     var delimiters = [',', ';', '\t', '|'];
     var results = [];
 
-    delimiters.forEach(function(delimiter) {
-        var res = dsv.dsv(delimiter).parse(x);
+    delimiters.forEach(function (delimiter) {
+        var res = dsv.dsvFormat(delimiter).parse(x);
         if (res.length >= 1) {
             var count = keyCount(res[0]);
             for (var i = 0; i < res.length; i++) {
@@ -385,7 +405,7 @@ function autoDelimiter(x) {
     });
 
     if (results.length) {
-        return results.sort(function(a, b) {
+        return results.sort(function (a, b) {
             return b.arity - a.arity;
         })[0].delimiter;
     } else {
@@ -407,7 +427,7 @@ function deleteColumns(x) {
 function auto(x) {
     var delimiter = autoDelimiter(x);
     if (!delimiter) return null;
-    return deleteColumns(dsv.dsv(delimiter).parse(x));
+    return deleteColumns(dsv.dsvFormat(delimiter).parse(x));
 }
 
 function csv2geojson(x, options, callback) {
@@ -424,47 +444,54 @@ function csv2geojson(x, options, callback) {
         crs = options.crs || '';
 
     var features = [],
-        featurecollection = { type: 'FeatureCollection', features: features };
+        featurecollection = {type: 'FeatureCollection', features: features};
 
     if (crs !== '') {
-        featurecollection.crs = { type: 'name', properties: { name: crs } };
+        featurecollection.crs = {type: 'name', properties: {name: crs}};
     }
 
     if (options.delimiter === 'auto' && typeof x == 'string') {
         options.delimiter = autoDelimiter(x);
-        if (!options.delimiter) return callback({
-            type: 'Error',
-            message: 'Could not autodetect delimiter'
-        });
+        if (!options.delimiter) {
+            callback({
+                type: 'Error',
+                message: 'Could not autodetect delimiter'
+            });
+            return;
+        }
     }
 
-    var parsed = (typeof x == 'string') ? 
-        dsv.dsv(options.delimiter).parse(x) : x;
+    var parsed = (typeof x == 'string') ?
+        dsv.dsvFormat(options.delimiter).parse(x) : x;
 
-    if (!parsed.length) return callback(null, featurecollection);
-
-    if (!latfield || !lonfield) {
-        for (var f in parsed[0]) {
-            if (!latfield && isLat(f)) latfield = f;
-            if (!lonfield && isLon(f)) lonfield = f;
-        }
-        if (!latfield || !lonfield) {
-            var fields = [];
-            for (var k in parsed[0]) fields.push(k);
-            return callback({
-                type: 'Error',
-                message: 'Latitude and longitude fields not present',
-                data: deleteColumns(parsed),
-                fields: fields
-            });
-        }
+    if (!parsed.length) {
+        callback(null, featurecollection);
+        return;
     }
 
     var errors = [];
+    var i;
 
-    for (var i = 0; i < parsed.length; i++) {
+
+    if (!latfield) latfield = guessLatHeader(parsed[0]);
+    if (!lonfield) lonfield = guessLonHeader(parsed[0]);
+    var noGeometry = (!latfield || !lonfield);
+
+    if (noGeometry) {
+        for (i = 0; i < parsed.length; i++) {
+            features.push({
+                type: 'Feature',
+                properties: parsed[i],
+                geometry: null
+            });
+        }
+        callback(errors.length ? errors : null, featurecollection);
+        return;
+    }
+
+    for (i = 0; i < parsed.length; i++) {
         if (parsed[i][lonfield] !== undefined &&
-            parsed[i][lonfield] !== undefined) {
+            parsed[i][latfield] !== undefined) {
 
             var lonk = parsed[i][lonfield],
                 latk = parsed[i][latfield],
@@ -483,7 +510,8 @@ function csv2geojson(x, options, callback) {
                 isNaN(latf)) {
                 errors.push({
                     message: 'A row contained an invalid value for latitude or longitude',
-                    row: parsed[i]
+                    row: parsed[i],
+                    index: i
                 });
             } else {
                 if (!options.includeLatLon) {
@@ -506,7 +534,7 @@ function csv2geojson(x, options, callback) {
         }
     }
 
-    callback(errors.length ? errors: null, featurecollection);
+    callback(errors.length ? errors : null, featurecollection);
 }
 
 function toLine(gj) {
@@ -521,14 +549,14 @@ function toLine(gj) {
     for (var i = 0; i < features.length; i++) {
         line.geometry.coordinates.push(features[i].geometry.coordinates);
     }
-    line.properties = features.reduce(function(aggregatedProperties, newFeature) {
-      for (var key in newFeature.properties) {
-        if (!aggregatedProperties[key]) {
-          aggregatedProperties[key] = [];
+    line.properties = features.reduce(function (aggregatedProperties, newFeature) {
+        for (var key in newFeature.properties) {
+            if (!aggregatedProperties[key]) {
+                aggregatedProperties[key] = [];
+            }
+            aggregatedProperties[key].push(newFeature.properties[key]);
         }
-        aggregatedProperties[key].push(newFeature.properties[key]);
-      }
-      return aggregatedProperties;
+        return aggregatedProperties;
     }, {});
     return {
         type: 'FeatureCollection',
@@ -548,14 +576,14 @@ function toPolygon(gj) {
     for (var i = 0; i < features.length; i++) {
         poly.geometry.coordinates[0].push(features[i].geometry.coordinates);
     }
-    poly.properties = features.reduce(function(aggregatedProperties, newFeature) {
-      for (var key in newFeature.properties) {
-        if (!aggregatedProperties[key]) {
-          aggregatedProperties[key] = [];
+    poly.properties = features.reduce(function (aggregatedProperties, newFeature) {
+        for (var key in newFeature.properties) {
+            if (!aggregatedProperties[key]) {
+                aggregatedProperties[key] = [];
+            }
+            aggregatedProperties[key].push(newFeature.properties[key]);
         }
-        aggregatedProperties[key].push(newFeature.properties[key]);
-      }
-      return aggregatedProperties;
+        return aggregatedProperties;
     }, {});
     return {
         type: 'FeatureCollection',
@@ -566,6 +594,8 @@ function toPolygon(gj) {
 module.exports = {
     isLon: isLon,
     isLat: isLat,
+    guessLatHeader: guessLatHeader,
+    guessLonHeader: guessLonHeader,
     csv: dsv.csvParse,
     tsv: dsv.tsvParse,
     dsv: dsv,
@@ -576,10 +606,11 @@ module.exports = {
 };
 
 },{"d3-dsv":5,"sexagesimal":8}],5:[function(require,module,exports){
+// https://d3js.org/d3-dsv/ Version 1.0.1. Copyright 2016 Mike Bostock.
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (factory((global.d3_dsv = {})));
+  (factory((global.d3 = global.d3 || {})));
 }(this, function (exports) { 'use strict';
 
   function objectConverter(columns) {
@@ -704,7 +735,9 @@ module.exports = {
     }
 
     function formatValue(text) {
-      return reFormat.test(text) ? "\"" + text.replace(/\"/g, "\"\"") + "\"" : text;
+      return text == null ? ""
+          : reFormat.test(text += "") ? "\"" + text.replace(/\"/g, "\"\"") + "\""
+          : text;
     }
 
     return {
@@ -729,10 +762,7 @@ module.exports = {
   var tsvFormat = tsv.format;
   var tsvFormatRows = tsv.formatRows;
 
-  var version = "0.2.0";
-
-  exports.version = version;
-  exports.dsv = dsv;
+  exports.dsvFormat = dsv;
   exports.csvParse = csvParse;
   exports.csvParseRows = csvParseRows;
   exports.csvFormat = csvFormat;
@@ -741,6 +771,8 @@ module.exports = {
   exports.tsvParseRows = tsvParseRows;
   exports.tsvFormat = tsvFormat;
   exports.tsvFormatRows = tsvFormatRows;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
 
 }));
 },{}],6:[function(require,module,exports){
@@ -900,8 +932,94 @@ if (typeof module === 'object' && module.exports) {
 
 },{}],7:[function(require,module,exports){
 // shim for using process in browser
-
 var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
 var queue = [];
 var draining = false;
 var currentQueue;
@@ -926,7 +1044,7 @@ function drainQueue() {
     if (draining) {
         return;
     }
-    var timeout = setTimeout(cleanUpNextTick);
+    var timeout = runTimeout(cleanUpNextTick);
     draining = true;
 
     var len = queue.length;
@@ -943,7 +1061,7 @@ function drainQueue() {
     }
     currentQueue = null;
     draining = false;
-    clearTimeout(timeout);
+    runClearTimeout(timeout);
 }
 
 process.nextTick = function (fun) {
@@ -955,7 +1073,7 @@ process.nextTick = function (fun) {
     }
     queue.push(new Item(fun, args));
     if (queue.length === 1 && !draining) {
-        setTimeout(drainQueue, 0);
+        runTimeout(drainQueue);
     }
 };
 
@@ -999,67 +1117,81 @@ module.exports = element;
 module.exports.pair = pair;
 module.exports.format = format;
 module.exports.formatPair = formatPair;
+module.exports.coordToDMS = coordToDMS;
 
 function element(x, dims) {
-    return search(x, dims).val;
+  return search(x, dims).val;
 }
 
 function formatPair(x) {
-    return format(x.lat, 'lat') + ' ' + format(x.lon, 'lon');
+  return format(x.lat, 'lat') + ' ' + format(x.lon, 'lon');
 }
 
 // Is 0 North or South?
 function format(x, dim) {
-    var dirs = {
-            lat: ['N', 'S'],
-            lon: ['E', 'W']
-        }[dim] || '',
-        dir = dirs[x >= 0 ? 0 : 1],
-        abs = Math.abs(x),
-        whole = Math.floor(abs),
-        fraction = abs - whole,
-        fractionMinutes = fraction * 60,
-        minutes = Math.floor(fractionMinutes),
-        seconds = Math.floor((fractionMinutes - minutes) * 60);
+  var dms = coordToDMS(x,dim);
+  return dms.whole + '° ' +
+    (dms.minutes ? dms.minutes + '\' ' : '') +
+    (dms.seconds ? dms.seconds + '" ' : '') + dms.dir;
+}
 
-    return whole + '° ' +
-        (minutes ? minutes + "' " : '') +
-        (seconds ? seconds + '" ' : '') + dir;
+function coordToDMS(x,dim) {
+  var dirs = {
+    lat: ['N', 'S'],
+    lon: ['E', 'W']
+  }[dim] || '',
+  dir = dirs[x >= 0 ? 0 : 1],
+    abs = Math.abs(x),
+    whole = Math.floor(abs),
+    fraction = abs - whole,
+    fractionMinutes = fraction * 60,
+    minutes = Math.floor(fractionMinutes),
+    seconds = Math.floor((fractionMinutes - minutes) * 60);
+
+  return {
+    whole: whole,
+    minutes: minutes,
+    seconds: seconds,
+    dir: dir
+  };
 }
 
 function search(x, dims, r) {
-    if (!dims) dims = 'NSEW';
-    if (typeof x !== 'string') return { val: null, regex: r };
-    r = r || /[\s\,]*([\-|\—|\―]?[0-9.]+)°? *(?:([0-9.]+)['’′‘] *)?(?:([0-9.]+)(?:''|"|”|″) *)?([NSEW])?/gi;
-    var m = r.exec(x);
-    if (!m) return { val: null, regex: r };
-    else if (m[4] && dims.indexOf(m[4]) === -1) return { val: null, regex: r };
-    else return {
-        val: (((m[1]) ? parseFloat(m[1]) : 0) +
-            ((m[2] ? parseFloat(m[2]) / 60 : 0)) +
-            ((m[3] ? parseFloat(m[3]) / 3600 : 0))) *
-            ((m[4] && m[4] === 'S' || m[4] === 'W') ? -1 : 1),
-        regex: r,
-        raw: m[0],
-        dim: m[4]
-    };
+  if (!dims) dims = 'NSEW';
+  if (typeof x !== 'string') return { val: null, regex: r };
+  r = r || /[\s\,]*([\-|\—|\―]?[0-9.]+)°? *(?:([0-9.]+)['’′‘] *)?(?:([0-9.]+)(?:''|"|”|″) *)?([NSEW])?/gi;
+  var m = r.exec(x);
+  if (!m) return { val: null, regex: r };
+  else if (m[4] && dims.indexOf(m[4]) === -1) return { val: null, regex: r };
+  else return {
+    val: (((m[1]) ? parseFloat(m[1]) : 0) +
+          ((m[2] ? parseFloat(m[2]) / 60 : 0)) +
+          ((m[3] ? parseFloat(m[3]) / 3600 : 0))) *
+          ((m[4] && m[4] === 'S' || m[4] === 'W') ? -1 : 1),
+    regex: r,
+    raw: m[0],
+    dim: m[4]
+  };
 }
 
 function pair(x, dims) {
-    x = x.trim();
-    var one = search(x, dims);
-    if (one.val === null) return null;
-    var two = search(x, dims, one.regex);
-    if (two.val === null) return null;
-    // null if one/two are not contiguous.
-    if (one.raw + two.raw !== x) return null;
-    if (one.dim) return swapdim(one.val, two.val, one.dim);
-    else return [one.val, two.val];
+  x = x.trim();
+  var one = search(x, dims);
+  if (one.val === null) return null;
+  var two = search(x, dims, one.regex);
+  if (two.val === null) return null;
+  // null if one/two are not contiguous.
+  if (one.raw + two.raw !== x) return null;
+  if (one.dim) {
+    return swapdim(one.val, two.val, one.dim);
+  } else {
+    return [one.val, two.val];
+  }
 }
 
 function swapdim(a, b, dim) {
-    if (dim == 'N' || dim == 'S') return [a, b];
-    if (dim == 'W' || dim == 'E') return [b, a];
+  if (dim === 'N' || dim === 'S') return [a, b];
+  if (dim === 'W' || dim === 'E') return [b, a];
 }
 
 },{}],9:[function(require,module,exports){
