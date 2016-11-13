@@ -1,6 +1,3 @@
-[![Build Status](https://travis-ci.org/mapbox/leaflet-omnivore.svg)](https://travis-ci.org/mapbox/leaflet-omnivore)
-[![CDNJS](https://img.shields.io/cdnjs/v/leaflet-omnivore.svg)](https://cdnjs.com/libraries/leaflet-omnivore)
-
 # leaflet-omnivore
 
 ![](https://farm8.staticflickr.com/7373/12376158164_e335b4e61d_b.jpg)
