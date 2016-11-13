@@ -1,3 +1,7 @@
+## 0.3.3
+
+* Call either `setGeoJSON` or `addData` on GeoJSON layers, not both.
+
 ## 0.3.2
 
 * Move `brfs` and `hintify` to dependencies.
