@@ -1,3 +1,8 @@
+## 0.3.4
+
+* From now on, the repository doesn't contain leaflet-omnivore.js or leaflet-omnivore.min.js. Those
+  files will be in the npm package and you can use unpkg.com to get them.
+
 ## 0.3.3
 
 * Call either `setGeoJSON` or `addData` on GeoJSON layers, not both.
