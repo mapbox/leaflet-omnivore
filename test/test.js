@@ -1,4 +1,4 @@
-require('maptalks');
+var maptalks = require('maptalks');
 require('../');
 
 var test = require('tape'),
