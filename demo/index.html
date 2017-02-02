@@ -23,11 +23,11 @@
         center:     [0, 0],
         zoom:  9,
         attributionControl : {
-        'content' : '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        'content' : '&copy; <a href="http://www.osm.org" target="_blank">OpenStreetMap</a> contributors'
         },
         baseLayer : new maptalks.TileLayer("base",{
-            'urlTemplate' : 'http://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
-            'subdomains'  : ['a','b','c','d','e']
+            'urlTemplate' : 'http://{s}.tile.thunderforest.com/transport/{z}/{x}/{y}.png',
+            'subdomains'  : ['a','b','c'],
         })
     });
 
