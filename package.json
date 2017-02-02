@@ -7,7 +7,7 @@
     "test-local": "zuul --local -- test/test.js",
     "test-remote": "zuul -- test/test.js",
     "test": "zuul --phantom -- test/test.js",
-    "build": "browserify --external maptalks index.js > maptalks.formats.js && uglifyjs maptalks.formats.js -c -m > maptalks.formats.min.js"
+    "build": "browserify --external maptalks index.js > dist/maptalks.formats.js && uglifyjs dist/maptalks.formats.js -c -m > dist/maptalks.formats.min.js"
   },
   "repository": {
     "type": "git",

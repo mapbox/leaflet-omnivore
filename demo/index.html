@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>formats demo</title>
+    <script src="https://unpkg.com/maptalks@<2.0.0/dist/maptalks.min.js"></script>
+    <script src="../dist/maptalks.formats.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://unpkg.com/maptalks@<2.0.0/dist/maptalks.css">
+    <style type="text/css">
+        html,body{
+            margin:0px;
+            height:100%;
+            width: 100%;
+         }
+    </style>
+</head>
+<body scroll="no" onload="mapInit();">
+<div style="width:100%;height:60%;" id="map"></div>
+<textarea style="width:100%;height:40%;" id="console"></textarea>
+<script type="text/javascript" >
+    var map = new maptalks.Map("map",{
+        center:     [0, 0],
+        zoom:  9,
+        attributionControl : {
+        'content' : '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        },
+        baseLayer : new maptalks.TileLayer("base",{
+            'urlTemplate' : 'http://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
+            'subdomains'  : ['a','b','c','d','e']
+        })
+    });
+
+    new maptalks.control.Toolbar({
+      'vertical' : false,
+      'position' : 'top-left',
+      'items'     : [
+        {
+            item: 'CSV',
+            click : function () {
+                var layer = maptalks.Formats.csv('test/a.csv')
+                .on('ready', function (param) {
+                    info(param.data);
+                    map.fitExtent(layer.getExtent());
+                })
+                .addTo(map);
+            }
+        },
+        {
+            item: 'GeoJSON',
+            click : function () {
+                var layer = maptalks.Formats.geojson('test/a.geojson')
+                .on('ready', function (param) {
+                    info(param.data);
+                    map.fitExtent(layer.getExtent());
+                })
+                .addTo(map);
+            }
+        },
+        {
+            item: 'GPX',
+            click : function () {
+                var layer = maptalks.Formats.gpx('test/a.gpx')
+                .on('ready', function (param) {
+                    info(param.data);
+                    map.fitExtent(layer.getExtent());
+                })
+                .addTo(map);
+            }
+        },
+        {
+            item: 'KML',
+            click : function () {
+                var layer = maptalks.Formats.kml('test/a.kml')
+                .on('ready', function (param) {
+                    info(param.data);
+                    map.fitExtent(layer.getExtent());
+                })
+                .addTo(map);
+            }
+        },
+        {
+            item: 'Polyline',
+            click : function () {
+                var layer = maptalks.Formats.polyline('test/a.polyline')
+                .on('ready', function (param) {
+                    info(param.data);
+                    map.fitExtent(layer.getExtent());
+                })
+                .addTo(map);
+            }
+        },
+        {
+            item: 'TopoJSON',
+            click : function () {
+                var layer = maptalks.Formats.topojson('test/a.topojson')
+                .on('ready', function (param) {
+                    info(param.data);
+                    map.fitExtent(layer.getExtent());
+                })
+                .addTo(map);
+            }
+        },
+        {
+            item: 'WKT',
+            click : function () {
+                var layer = maptalks.Formats.wkt('test/a.wkt')
+                .on('ready', function (param) {
+                    info(param.data);
+                    map.fitExtent(layer.getExtent());
+                })
+                .addTo(map);
+            }
+        },
+        {
+            item: '源代码地址',
+            click : function () {
+                window.location.href = "https://github.com/fuzhenn/maptlaks.formats"
+            }
+        }
+    ]
+    }).addTo(map);
+
+
+    function info(info) {
+        document.getElementById('console').value = '<pre>' + info + '</pre>';
+    }
+</script>
+</body>
+</html>
