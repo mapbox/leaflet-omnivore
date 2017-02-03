@@ -56,7 +56,7 @@
   "devDependencies": {
     "browserify": "13.0.1",
     "eslint": "^3.4.0",
-    "maptalks": "<2.0.0",
+    "maptalks": "^0.17.0",
     "mocha": "~2.5.3",
     "phantomjs-prebuilt": "2.1.7",
     "st": "1.1.0",
