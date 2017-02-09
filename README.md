@@ -162,7 +162,7 @@ cd leaflet-omnivore
 npm install
 
 # to build leaflet-omnivore.js
-npm run build
+npm run prepublish
 ```
 
 `leaflet-omnivore.js` and `leaflet-omnivore.min.js` are **built files** generated
