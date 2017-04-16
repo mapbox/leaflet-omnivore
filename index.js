@@ -24,6 +24,7 @@ module.exports.kml.parse = kmlParse;
 
 module.exports.wkt = wktLoad;
 module.exports.wkt.parse = wktParse;
+module.exports.wkt.stringify = wktStringify;
 
 function addData(l, d) {
     if ('setGeoJSON' in l) {
@@ -247,6 +248,10 @@ function wktParse(wkt, options, layer) {
     var geojson = wellknown(wkt);
     addData(layer, geojson);
     return layer;
+}
+
+function wktStringify(geoJson) {
+    return wellknown.stringify(geoJson);
 }
 
 function parseXML(str) {
