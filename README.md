@@ -67,18 +67,18 @@ You can also use this API to pass custom options to a `L.geoJson()` instance.:
 
 
 * `.csv(url, parser_options?, customLayer?)`: Load & parse CSV, and return layer. Options are the same as [csv2geojson](https://github.com/mapbox/csv2geojson#api): `latfield, lonfield, delimiter`
-* `.csv.parse(csvString, parser_options?)`: Parse CSV, and return layer.
-* `.kml(url)`: Load & parse KML, and return layer.
-* `.kml.parse(kmlString | gpxDom)`: Parse KML from a string of XML or XML DOM, and return layer.
+* `.csv.parse(csvString, parser_options?, customLayer?)`: Parse CSV, and return layer.
+* `.kml(url, parser_options?, customLayer?)`: Load & parse KML, and return layer.
+* `.kml.parse(kmlString | gpxDom, parser_options?, customLayer?)`: Parse KML from a string of XML or XML DOM, and return layer.
 * `.gpx(url, parser_options?, customLayer?)`: Load & parse GPX, and return layer.
-* `.gpx.parse(gpxString | gpxDom)`: Parse GPX from a string of XML or XML DOM, and return layer.
+* `.gpx.parse(gpxString | gpxDom, parser_options?, customLayer?)`: Parse GPX from a string of XML or XML DOM, and return layer.
 * `.geojson(url, parser_options?, customLayer?)`: Load GeoJSON file at URL, parse GeoJSON, and return layer.
 * `.wkt(url, parser_options?, customLayer?)`: Load & parse WKT, and return layer.
-* `.wkt.parse(wktString)`: Parse WKT, and return layer.
+* `.wkt.parse(wktString, parser_options?, customLayer?)`: Parse WKT, and return layer.
 * `.topojson(url, parser_options?, customLayer?)`: Load & parse TopoJSON, and return layer.
-* `.topojson.parse(topojson)`: Parse TopoJSON (given as a string or object), and return layer.
+* `.topojson.parse(topojson, parser_options?, customLayer?)`: Parse TopoJSON (given as a string or object), and return layer.
 * `.polyline(url, parser_options?, customLayer?)`: Load & parse polyline, and return layer.
-* `.polyline.parse(txt, options, layer)`: Parse polyline (given as a string or object), and return layer.
+* `.polyline.parse(txt, parser_options?, customLayer?)`: Parse polyline (given as a string or object), and return layer.
 
 Valid options:
 
