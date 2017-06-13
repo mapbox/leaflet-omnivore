@@ -1,8 +1,9 @@
-[![Circle CI](https://circleci.com/gh/fuzhenn/maptalks.formats.svg?style=shield)](https://circleci.com/gh/fuzhenn/maptalks.formats)
+[![Circle CI](https://circleci.com/gh/maptalks/maptalks.formats.svg?style=shield)](https://circleci.com/gh/maptalks/maptalks.formats)
+[![NPM Version](https://img.shields.io/npm/v/maptalks.animatemarker.svg)](https://github.com/maptalks/maptalks.animatemarker)
 
 # maptalks.formats
 
-This is a work based on [leaflet-omnivore](https://github.com/mapbox/leaflet-omnivore). All credits go to it.
+This is a work inspired by [leaflet-omnivore](https://github.com/mapbox/leaflet-omnivore). 
 
 A maptalks.js's plugin for geographic data format supports.
 
@@ -15,8 +16,6 @@ It currently supports:
 * [TopoJSON](https://github.com/mbostock/topojson)
 * [Encoded Polylines](https://developers.google.com/maps/documentation/utilities/polylinealgorithm) via [polyline](https://github.com/mapbox/polyline)
 
-It also includes an AJAX library, [corslite](https://github.com/mapbox/corslite),
-so you can specify what you want to add to the map with just a URL.
 
 ## Installation
 
@@ -31,40 +30,32 @@ npm install maptalks.formats --save
 ## example
 
 ```js
-var map = new maptalks.Map('map', ...);
-
-maptalks.Formats.csv('a.csv').addTo(map);
-maptalks.Formats.gpx('a.gpx').addTo(map);
-maptalks.Formats.kml('a.kml').addTo(map);
-maptalks.Formats.wkt('a.wkt').addTo(map);
-maptalks.Formats.topojson('a.topojson').addTo(map);
-maptalks.Formats.geojson('a.geojson').addTo(map);
-maptalks.Formats.polyline('a.txt').addTo(map);
+maptalks.Formats.csv('a.csv', function (err, data) { });
+maptalks.Formats.gpx('a.gpx', function (err, data) { });
+maptalks.Formats.kml('a.kml', function (err, data) { });
+maptalks.Formats.wkt('a.wkt', function (err, data) { });
+maptalks.Formats.topojson('a.topojson', function (err, data) { });
+maptalks.Formats.polyline('a.txt', function (err, data) { });
 ```
 
 ## API
 
 Arguments with `?` are optional. **parser_options** consists of options
-sent to the parser library, _not_ to the layer: if you want to provide options
-to the layer, see the example in the Custom Layers section.
-
-By default, the library will construct a `maptalks.GeoJSONLayer` layer internally and
-call `.addData(geojson)` on it in order to load it full of GeoJSON. :
+sent to the parser library:
 
 
-* `.csv(url, parser_options?, customLayer?)`: Load & parse CSV, and return layer. Options are the same as [csv2geojson](https://github.com/mapbox/csv2geojson#api): `latfield, lonfield, delimiter`
-* `.csv.parse(csvString, parser_options?)`: Parse CSV, and return layer.
-* `.kml(url)`: Load & parse KML, and return layer.
-* `.kml.parse(kmlString | gpxDom)`: Parse KML from a string of XML or XML DOM, and return layer.
-* `.gpx(url, parser_options?, customLayer?)`: Load & parse GPX, and return layer.
-* `.gpx.parse(gpxString | gpxDom)`: Parse GPX from a string of XML or XML DOM, and return layer.
-* `.geojson(url, parser_options?, customLayer?)`: Load GeoJSON file at URL, parse GeoJSON, and return layer.
-* `.wkt(url, parser_options?, customLayer?)`: Load & parse WKT, and return layer.
-* `.wkt.parse(wktString)`: Parse WKT, and return layer.
-* `.topojson(url, parser_options?, customLayer?)`: Load & parse TopoJSON, and return layer.
-* `.topojson.parse(topojson)`: Parse TopoJSON (given as a string or object), and return layer.
-* `.polyline(url, parser_options?, customLayer?)`: Load & parse polyline, and return layer.
-* `.polyline.parse(txt, options, layer)`: Parse polyline (given as a string or object), and return layer.
+* `.csv(url, parser_options?, callback)`: Load & parse CSV. Options are the same as [csv2geojson](https://github.com/mapbox/csv2geojson#api): `latfield, lonfield, delimiter`
+* `.csv.parse(csvString, parser_options?, callback)`: Parse CSV, and return layer.
+* `.kml(url, callback)`: Load & parse KML.
+* `.kml.parse(kmlString | gpxDom)`: Parse KML from a string of XML or XML DOM.
+* `.gpx(url, callback)`: Load & parse GPX.
+* `.gpx.parse(gpxString | gpxDom)`: Parse GPX from a string of XML or XML DOM.
+* `.wkt(url, callback)`: Load & parse WKT.
+* `.wkt.parse(wktString)`: Parse WKT.
+* `.topojson(url, callback)`: Load & parse TopoJSON.
+* `.topojson.parse(topojson)`: Parse TopoJSON (given as a string or object).
+* `.polyline(url, parser_options?, callback)`: Load & parse polyline.
+* `.polyline.parse(txt, options)`: Parse polyline (given as a string or object).
 
 Valid options:
 
@@ -77,34 +68,17 @@ Valid options:
 
 ### Async & Events
 
-Each function returns an `maptalks.GeoJSONLayer` object. Functions that load from URLs
+Each function returns an `maptalks.Formats` instance. Functions that load from URLs
 are **asynchronous**, so they will **not** be immediately loaded.
 
-For this reason, we fire events:
-
-* `ready`: fired when all data is loaded into the layer
-* `error`: fired if data can't be loaded or parsed
-
 ```js
-var layer = maptalks.Formats.gpx('a.gpx')
-    .on('ready', function() {
-        // when this is fired, the layer
-        // is done being initialized
-    })
-    .on('error', function() {
-        // fired if the layer can't be loaded over AJAX
-        // or can't be parsed
-    })
-    .addTo(map);
+maptalks.Formats.gpx('a.gpx', function (err, data) {
+    // callback when loaded    
+});
 ```
 
-`ready` does **not** fire if you don't use an asynchronous form of the function
-like `.topojson.parse()`: because you don't need an event. Just run your code
-after the call.
 
 ## Development
-
-This is a [browserify](http://browserify.org/) project:
 
 ```sh
 git clone git@github.com:maptalks/maptalks.formats.git
@@ -119,8 +93,8 @@ npm run build
 ```
 
 `maptalks.formats.js` and `maptalks.formats.min.js` are **built files** generated
-from `index.js` by `browserify`. If you find an issue, it either needs to be
-fixed in `index.js`, or in one of the libraries leaflet-omnivore uses
+from `index.js` by `rollup`. If you find an issue, it either needs to be
+fixed in `index.js`, or in one of the libraries maptalks.formats uses
 to parse formats.
 
 ## FAQ
