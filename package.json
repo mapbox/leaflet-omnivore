@@ -2,7 +2,8 @@
   "name": "maptalks.formats",
   "version": "0.0.0",
   "description": "A geospatial format parser for Maptalks",
-  "main": "index.js",
+  "module": "index.js",
+  "main": "dist/maptalks.formats.js",
   "scripts": {
     "preversion": "npm test",
     "version": "gulp minify && git add -A dist",
@@ -10,7 +11,7 @@
     "test": "gulp test",
     "pretest": "npm run lint",
     "prepublish": "npm run lint && gulp minify",
-    "build" : "gulp minify"
+    "build": "gulp minify"
   },
   "repository": {
     "type": "git",
