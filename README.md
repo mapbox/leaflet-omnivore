@@ -30,12 +30,12 @@ npm install maptalks.formats --save
 ## example
 
 ```js
-maptalks.Formats.csv('a.csv', function (err, data) { });
-maptalks.Formats.gpx('a.gpx', function (err, data) { });
-maptalks.Formats.kml('a.kml', function (err, data) { });
-maptalks.Formats.wkt('a.wkt', function (err, data) { });
-maptalks.Formats.topojson('a.topojson', function (err, data) { });
-maptalks.Formats.polyline('a.txt', function (err, data) { });
+maptalks.Formats.csv('a.csv', function (err, geojson) { });
+maptalks.Formats.gpx('a.gpx', function (err, geojson) { });
+maptalks.Formats.kml('a.kml', function (err, geojson) { });
+maptalks.Formats.wkt('a.wkt', function (err, geojson) { });
+maptalks.Formats.topojson('a.topojson', function (err, geojson) { });
+maptalks.Formats.polyline('a.txt', function (err, geojson) { });
 ```
 
 ## API
@@ -72,8 +72,11 @@ Each function returns an `maptalks.Formats` instance. Functions that load from U
 are **asynchronous**, so they will **not** be immediately loaded.
 
 ```js
-maptalks.Formats.gpx('a.gpx', function (err, data) {
-    // callback when loaded    
+var map = new maptalks.Map('map', options);
+
+maptalks.Formats.gpx('a.gpx', function (err, geojson) {
+    // callback when loaded
+    new maptalks.VectorLayer('gpx', geojson).addTo(map);
 });
 ```
 
