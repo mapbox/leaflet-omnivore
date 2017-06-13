@@ -1,5 +1,5 @@
 [![Circle CI](https://circleci.com/gh/maptalks/maptalks.formats.svg?style=shield)](https://circleci.com/gh/maptalks/maptalks.formats)
-[![NPM Version](https://img.shields.io/npm/v/maptalks.animatemarker.svg)](https://github.com/maptalks/maptalks.animatemarker)
+[![NPM Version](https://img.shields.io/npm/v/maptalks.formats.svg)](https://github.com/maptalks/maptalks.formats)
 
 # maptalks.formats
 
