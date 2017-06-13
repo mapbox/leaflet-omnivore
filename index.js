@@ -1,252 +1,213 @@
-var xhr = require('corslite'),
-    csv2geojson = require('csv2geojson'),
-    wellknown = require('wellknown'),
-    polyline = require('polyline'),
-    topojson = require('topojson'),
-    toGeoJSON = require('togeojson');
+import * as maptalks from 'maptalks';
+import csv2geojson from 'csv2geojson';
+import wellknown from 'wellknown';
+import polyline from '@mapbox/polyline';
+import { feature as topoFeature } from 'topojson';
+import toGeoJSON from '@mapbox/togeojson';
 
-var maptalks = (typeof window !== 'undefined') ? window.maptalks : require('maptalks');
+const formats = {
+    topojson : topojsonLoad,
+    csv : csvLoad,
+    gpx : gpxLoad,
+    kml : kmlLoad,
+    wkt : wktLoad,
+    polyline : polylineLoad
+};
 
-module.exports.polyline = polylineLoad;
-module.exports.polyline.parse = polylineParse;
-
-module.exports.geojson = geojsonLoad;
-
-module.exports.topojson = topojsonLoad;
-module.exports.topojson.parse = topojsonParse;
-
-module.exports.csv = csvLoad;
-module.exports.csv.parse = csvParse;
-
-module.exports.gpx = gpxLoad;
-module.exports.gpx.parse = gpxParse;
-
-module.exports.kml = kmlLoad;
-module.exports.kml.parse = kmlParse;
-
-module.exports.wkt = wktLoad;
-module.exports.wkt.parse = wktParse;
-
-maptalks.Formats = module.exports;
-
-function addData(l, d) {
-    if ('addData' in l) l.addData(d);
-}
+export { formats as Formats };
 
 /**
- * Load a [GeoJSON](http://geojson.org/) document into a layer and return the layer.
+ * Load a [TopoJSON](https://github.com/mbostock/topojson) document.
  *
  * @param {string} url
- * @param {object} options
- * @param {object} customLayer
- * @returns {object}
+ * @param {function} callback
+ * @returns this
  */
-function geojsonLoad(url, options, customLayer) {
-    var layer = customLayer || new maptalks.GeoJSONLayer(url + '_' + maptalks.Util.UID());
-    xhr(url, function(err, response) {
-        if (err) return layer.fire('error', { error: err });
-        addData(layer, JSON.parse(response.responseText));
-        layer.fire('ready');
+function topojsonLoad(url, cb) {
+    maptalks.Ajax.get(url, (err, response) => {
+        if (err) {
+            cb(err);
+            return;
+        }
+        const json = topojsonParse(response);
+        cb(null, json);
     });
-    return layer;
+    return this;
 }
 
-/**
- * Load a [TopoJSON](https://github.com/mbostock/topojson) document into a layer and return the layer.
- *
- * @param {string} url
- * @param {object} options
- * @param {object} customLayer
- * @returns {object}
- */
-function topojsonLoad(url, options, customLayer) {
-    var layer = customLayer || new maptalks.GeoJSONLayer(url + '_' + maptalks.Util.UID());
-    xhr(url, onload);
-    function onload(err, response) {
-        if (err) return layer.fire('error', { error: err });
-        topojsonParse(response.responseText, options, layer);
-        layer.fire('ready');
-    }
-    return layer;
-}
+topojsonLoad.parse = topojsonParse;
 
 /**
  * Load a CSV document into a layer and return the layer.
  *
  * @param {string} url
  * @param {object} options
- * @param {object} customLayer
- * @returns {object}
+ * @param {function} callback
+ * @returns this
  */
-function csvLoad(url, options, customLayer) {
-    var layer = customLayer || new maptalks.GeoJSONLayer(url + '_' + maptalks.Util.UID());
-    xhr(url, onload);
-    function onload(err, response) {
-        var error;
-        if (err) return layer.fire('error', { error: err });
-        function avoidReady() {
-            error = true;
+function csvLoad(url, options, cb) {
+    maptalks.Ajax.get(url, (err, response) => {
+        if (err) {
+            cb(err);
+            return;
         }
-        layer.on('error', avoidReady);
-        csvParse(response.responseText, options, layer);
-        layer.off('error', avoidReady);
-        if (!error) layer.fire('ready');
-    }
-    return layer;
+        if (maptalks.Util.isFunction(options)) {
+            cb = options;
+            options = {};
+        }
+        csvParse(response, options, (err, geojson) => {
+            if (err) {
+                cb(err);
+                return;
+            }
+            cb(null, geojson);
+        });
+    });
+    return this;
 }
 
-/**
- * Load a GPX document into a layer and return the layer.
- *
- * @param {string} url
- * @param {object} options
- * @param {object} customLayer
- * @returns {object}
- */
-function gpxLoad(url, options, customLayer) {
-    var layer = customLayer || new maptalks.GeoJSONLayer(url + '_' + maptalks.Util.UID());
-    xhr(url, onload);
-    function onload(err, response) {
-        var error;
-        if (err) return layer.fire('error', { error: err });
-        function avoidReady() {
-            error = true;
-        }
-        layer.on('error', avoidReady);
-        gpxParse(response.responseXML || response.responseText, options, layer);
-        layer.off('error', avoidReady);
-        if (!error) layer.fire('ready');
-    }
-    return layer;
-}
+csvLoad.parse = csvParse;
 
 /**
- * Load a [KML](https://developers.google.com/kml/documentation/) document into a layer and return the layer.
+ * Load a GPX document.
  *
  * @param {string} url
- * @param {object} options
- * @param {object} customLayer
- * @returns {object}
+ * @param {function} callback
+ * @returns this
  */
-function kmlLoad(url, options, customLayer) {
-    var layer = customLayer || new maptalks.GeoJSONLayer(url + '_' + maptalks.Util.UID());
-    xhr(url, onload);
-    function onload(err, response) {
-        var error;
-        if (err) return layer.fire('error', { error: err });
-        function avoidReady() {
-            error = true;
+function gpxLoad(url, cb) {
+    maptalks.Ajax.get(url, (err, response) => {
+        if (err) {
+            cb(err);
+            return;
         }
-        layer.on('error', avoidReady);
-        kmlParse(response.responseXML || response.responseText, options, layer);
-        layer.off('error', avoidReady);
-        if (!error) layer.fire('ready');
-    }
-    return layer;
+        const geojson = gpxParse(response);
+        cb(null, geojson);
+    });
+    return this;
 }
 
+gpxLoad.parse = gpxParse;
+
 /**
- * Load a WKT (Well Known Text) string into a layer and return the layer
+ * Load a [KML](https://developers.google.com/kml/documentation/) document.
  *
  * @param {string} url
- * @param {object} options
+ * @param {function} callback
+ * @returns this
+ */
+function kmlLoad(url, cb) {
+    maptalks.Ajax.get(url, (err, response) => {
+        if (err) {
+            cb(err);
+            return;
+        }
+        const geojson = kmlParse(response);
+        cb(null, geojson);
+    });
+    return this;
+}
+
+kmlLoad.parse = kmlParse;
+
+/**
+ * Load a WKT (Well Known Text) string
+ *
+ * @param {string} url
  * @param {object} customLayer
  * @returns {object}
  */
-function wktLoad(url, options, customLayer) {
-    var layer = customLayer || new maptalks.GeoJSONLayer(url + '_' + maptalks.Util.UID());
-    xhr(url, onload);
-    function onload(err, response) {
-        if (err) return layer.fire('error', { error: err });
-        wktParse(response.responseText, options, layer);
-        layer.fire('ready');
-    }
-    return layer;
+function wktLoad(url, cb) {
+    maptalks.Ajax.get(url, (err, response) => {
+        if (err) {
+            cb(err);
+            return;
+        }
+        const geojson = wktParse(response);
+        cb(null, geojson);
+    });
+    return this;
 }
+
+wktLoad.parse = wktParse;
 
 /**
  * Load a polyline string into a layer and return the layer
  *
  * @param {string} url
  * @param {object} options
- * @param {object} customLayer
+ * @param {function} callback
  * @returns {object}
  */
-function polylineLoad(url, options, customLayer) {
-    var layer = customLayer || new maptalks.GeoJSONLayer(url + '_' + maptalks.Util.UID());
-    xhr(url, onload);
-    function onload(err, response) {
-        if (err) return layer.fire('error', { error: err });
-        polylineParse(response.responseText, options, layer);
-        layer.fire('ready');
-    }
-    return layer;
+function polylineLoad(url, options, cb) {
+    maptalks.Ajax.get(url, (err, response) => {
+        if (err) {
+            cb(err);
+            return;
+        }
+        if (maptalks.Util.isFunction(options)) {
+            cb = options;
+            options = {};
+        }
+        const geojson = polylineParse(response, options);
+        cb(null, geojson);
+    });
+    return this;
 }
 
-function topojsonParse(data, options, layer) {
-    var o = typeof data === 'string' ?
+polylineLoad.parse = polylineParse;
+
+function topojsonParse(data) {
+    const json = [];
+    const o = typeof data === 'string' ?
         JSON.parse(data) : data;
-    layer = layer || new maptalks.GeoJSONLayer('format_topojson_' + maptalks.Util.UID());
-    for (var i in o.objects) {
-        var ft = topojson.feature(o, o.objects[i]);
-        if (ft.features) addData(layer, ft.features);
-        else addData(layer, ft);
+    for (const i in o.objects) {
+        const ft = topoFeature(o, o.objects[i]);
+        if (ft.features) {
+            maptalks.Util.pushIn(json, ft.features);
+        } else {
+            json.push(ft);
+        }
     }
-    return layer;
+    return json;
 }
 
-function csvParse(csv, options, layer) {
-    layer = layer || new maptalks.GeoJSONLayer('format_csv_' + maptalks.Util.UID());
-    options = options || {};
-    csv2geojson.csv2geojson(csv, options, onparse);
-    function onparse(err, geojson) {
-        if (err) return layer.fire('error', { error: err });
-        addData(layer, geojson);
+
+function csvParse(csv, options, cb) {
+    csv2geojson.csv2geojson(csv, options || {}, (err, geojson) => cb(err, geojson));
+}
+
+function gpxParse(gpx) {
+    const xml = parseXML(gpx);
+    if (!xml) {
+        throw new Error('Could not parse gpx');
     }
-    return layer;
+    const geojson = toGeoJSON.gpx(xml);
+    return geojson;
 }
 
-function gpxParse(gpx, options, layer) {
-    var xml = parseXML(gpx);
-    if (!xml) return layer.fire('error', {
-        error: 'Could not parse GPX'
-    });
-    layer = layer || new maptalks.GeoJSONLayer('format_gpx_' + maptalks.Util.UID());
-    var geojson = toGeoJSON.gpx(xml);
-    addData(layer, geojson);
-    return layer;
+function kmlParse(kml) {
+    const xml = parseXML(kml);
+    if (!xml) {
+        throw new Error('Could not parse KML');
+    }
+    const geojson = toGeoJSON.kml(xml);
+    return geojson;
 }
 
-
-function kmlParse(kml, options, layer) {
-    var xml = parseXML(kml);
-    if (!xml) return layer.fire('error', {
-        error: 'Could not parse KML'
-    });
-    layer = layer || new maptalks.GeoJSONLayer('format_kml_' + maptalks.Util.UID());
-    var geojson = toGeoJSON.kml(xml);
-    addData(layer, geojson);
-    return layer;
+function wktParse(wkt) {
+    return wellknown(wkt);
 }
 
-function polylineParse(txt, options, layer) {
-    layer = layer || new maptalks.GeoJSONLayer('format_polyline_' + maptalks.Util.UID());
+function polylineParse(txt, options) {
     options = options || {};
-    var coords = polyline.decode(txt, options.precision);
-    var geojson = { type: 'LineString', coordinates: [] };
-    for (var i = 0; i < coords.length; i++) {
+    const coords = polyline.decode(txt, options.precision);
+    const geojson = { type: 'LineString', coordinates: [] };
+    for (let i = 0; i < coords.length; i++) {
         // polyline returns coords in lat, lng order, so flip for geojson
         geojson.coordinates[i] = [coords[i][1], coords[i][0]];
     }
-    addData(layer, geojson);
-    return layer;
-}
-
-function wktParse(wkt, options, layer) {
-    layer = layer || new maptalks.GeoJSONLayer('format_wkt_' + maptalks.Util.UID());
-    var geojson = wellknown(wkt);
-    addData(layer, geojson);
-    return layer;
+    return geojson;
 }
 
 function parseXML(str) {

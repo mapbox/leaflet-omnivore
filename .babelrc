@@ -1,0 +1,13 @@
+{
+  "presets": [
+    ["es2015", { "loose" : true, "modules" : false }]
+  ],
+  "plugins" : [
+    "transform-proto-to-assign",
+    "external-helpers"
+  ],
+  "ignore": [
+    "dist/*.js"
+  ],
+  "comments": false
+}

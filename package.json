@@ -1,22 +1,20 @@
 {
   "name": "maptalks.formats",
   "version": "0.1.0",
-  "description": "a geospatial format parser for Maptalks",
+  "description": "A geospatial format parser for Maptalks",
   "main": "index.js",
   "scripts": {
-    "test-local": "zuul --local -- test/test.js",
-    "test-remote": "zuul -- test/test.js",
-    "test": "zuul --phantom -- test/test.js",
-    "build": "browserify --external maptalks index.js > dist/maptalks.formats.js && uglifyjs dist/maptalks.formats.js -c -m > dist/maptalks.formats.min.js"
+    "preversion": "npm test",
+    "version": "gulp minify && git add -A dist",
+    "lint": "eslint index.js test/**/*.js",
+    "test": "gulp test",
+    "pretest": "npm run lint",
+    "prepublish": "npm run lint && gulp minify",
+    "build" : "gulp minify"
   },
   "repository": {
     "type": "git",
     "url": "git@github.com:maptalks/maptalks.formats.git"
-  },
-  "browserify": {
-    "transform": [
-      "brfs"
-    ]
   },
   "keywords": [
     "maptalks",
@@ -45,23 +43,38 @@
   },
   "homepage": "https://github.com/maptalks/maptalks.formats",
   "dependencies": {
-    "brfs": "1.4.3",
-    "corslite": "0.0.7",
-    "csv2geojson": "~5.0.0",
-    "polyline": "0.2.0",
-    "togeojson": "0.13.0",
-    "topojson": "1.6.26",
-    "wellknown": "0.4.2"
+    "@mapbox/polyline": "^0.2.0",
+    "@mapbox/togeojson": "^0.16.0",
+    "csv2geojson": "^5.0.0",
+    "topojson": "^3.0.0",
+    "wellknown": "^0.4.2"
   },
   "devDependencies": {
-    "browserify": "13.0.1",
-    "eslint": "^3.4.0",
-    "maptalks": "^0.17.0",
-    "mocha": "~2.5.3",
-    "phantomjs-prebuilt": "2.1.7",
-    "st": "1.1.0",
-    "tape": "4.5.1",
-    "uglify-js": "^2.6.2",
-    "zuul": "~3.10.1"
+    "babel-eslint": "^7.1.1",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-es2015": "^6.18.0",
+    "eslint": "^2.4.0",
+    "eslint-config-maptalks": "^0.2.1",
+    "eslint-plugin-mocha": "^4.8.0",
+    "expect-maptalks": "^0.2.5",
+    "expect.js": "^0.3.1",
+    "gulp": "^3.9.0",
+    "happen": "^0.3.1",
+    "karma": "^1.3.0",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-expect": "^1.1.3",
+    "karma-expect-maptalks": "^0.1.4",
+    "karma-firefox-launcher": "^1.0.0",
+    "karma-happen": "^0.1.0",
+    "karma-ie-launcher": "^1.0.0",
+    "karma-mocha": "^1.3.0",
+    "karma-mocha-reporter": "^2.2.1",
+    "maptalks": "^0.25.0",
+    "maptalks-build-helpers": "^0.2.1",
+    "minimist": "^1.2.0",
+    "mocha": "^2.4.5"
+  },
+  "peerDependencies": {
+    "maptalks": "^0.25.0"
   }
 }
