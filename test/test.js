@@ -98,4 +98,14 @@ describe('maptalks.formats', function () {
             done();
         });
     });
+
+    it('geojson', function (done) {
+        maptalks.Formats.geojson('/base/test/a.geojson', function (err, data) {
+            if (err) {
+                throw err;
+            }
+            expect(data).to.be.ok();
+            done();
+        });
+    });
 });

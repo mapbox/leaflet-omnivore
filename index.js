@@ -6,6 +6,7 @@ import { feature as topoFeature } from 'topojson';
 import toGeoJSON from '@mapbox/togeojson';
 
 const formats = {
+    geojson : geojsonLoad,
     topojson : topojsonLoad,
     csv : csvLoad,
     gpx : gpxLoad,
@@ -15,6 +16,18 @@ const formats = {
 };
 
 export { formats as Formats };
+
+function geojsonLoad(url, cb) {
+    maptalks.Ajax.get(url, (err, response) => {
+        if (err) {
+            cb(err);
+            return;
+        }
+        const json = JSON.parse(response);
+        cb(null, json);
+    });
+    return this;
+}
 
 /**
  * Load a [TopoJSON](https://github.com/mbostock/topojson) document.

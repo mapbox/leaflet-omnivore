@@ -5,7 +5,7 @@
 
 This is a work inspired by [leaflet-omnivore](https://github.com/mapbox/leaflet-omnivore). 
 
-A maptalks.js's plugin for geographic data format supports.
+A maptalks.js's plugin for geographic data format supports, convert various data formats to GeoJSON.
 
 It currently supports:
 
@@ -30,6 +30,7 @@ npm install maptalks.formats --save
 ## example
 
 ```js
+maptalks.Formats.geojson('a.geojson', function (err, geojson) { });
 maptalks.Formats.csv('a.csv', function (err, geojson) { });
 maptalks.Formats.gpx('a.gpx', function (err, geojson) { });
 maptalks.Formats.kml('a.kml', function (err, geojson) { });
@@ -50,6 +51,7 @@ sent to the parser library:
 * `.kml.parse(kmlString | gpxDom)`: Parse KML from a string of XML or XML DOM.
 * `.gpx(url, callback)`: Load & parse GPX.
 * `.gpx.parse(gpxString | gpxDom)`: Parse GPX from a string of XML or XML DOM.
+* `.geojson(url, callback)`: Load GeoJSON file at URL, parse GeoJSON.
 * `.wkt(url, callback)`: Load & parse WKT.
 * `.wkt.parse(wktString)`: Parse WKT.
 * `.topojson(url, callback)`: Load & parse TopoJSON.
