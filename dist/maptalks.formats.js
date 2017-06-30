@@ -1,5 +1,5 @@
 /*!
- * maptalks.formats v0.1.0
+ * maptalks.formats v0.2.0
  * LICENSE : BSD-3-Clause
  * (c) 2016-2017 maptalks.org
  */
@@ -3616,6 +3616,7 @@ var togeojson = createCommonjsModule(function (module, exports) {
 });
 
 var formats = {
+    geojson: geojsonLoad,
     topojson: topojsonLoad,
     csv: csvLoad,
     gpx: gpxLoad,
@@ -3623,6 +3624,18 @@ var formats = {
     wkt: wktLoad,
     polyline: polylineLoad
 };
+
+function geojsonLoad(url, cb) {
+    maptalks.Ajax.get(url, function (err, response) {
+        if (err) {
+            cb(err);
+            return;
+        }
+        var json = JSON.parse(response);
+        cb(null, json);
+    });
+    return this;
+}
 
 function topojsonLoad(url, cb) {
     maptalks.Ajax.get(url, function (err, response) {
@@ -3785,6 +3798,6 @@ exports.Formats = formats;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-typeof console !== 'undefined' && console.log('maptalks.formats v0.1.0, requires maptalks@^0.25.0.');
+typeof console !== 'undefined' && console.log('maptalks.formats v0.2.0, requires maptalks@^0.25.0.');
 
 })));
