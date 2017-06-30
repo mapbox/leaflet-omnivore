@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/maptalks/maptalks.formats/tree/gh-pages.svg?style=shield)](https://circleci.com/gh/maptalks/maptalks.formats/)
+[![CircleCI](https://circleci.com/gh/maptalks/maptalks.formats/tree/master.svg?style=shield)](https://circleci.com/gh/maptalks/maptalks.formats/)
 [![NPM Version](https://img.shields.io/npm/v/maptalks.formats.svg)](https://github.com/maptalks/maptalks.formats)
 
 # maptalks.formats
