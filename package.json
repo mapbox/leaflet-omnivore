@@ -48,13 +48,14 @@
   },
   "homepage": "https://github.com/mapbox/leaflet-omnivore",
   "dependencies": {
-    "csv2geojson": "~5.0.0",
-    "togeojson": "0.13.0",
-    "corslite": "0.0.7",
-    "wellknown": "0.4.2",
     "brfs": "1.4.3",
+    "corslite": "0.0.7",
+    "csv2geojson": "~5.0.0",
+    "polyline": "0.2.0",
+    "tcx": "^0.1.0",
+    "togeojson": "0.13.0",
     "topojson": "1.6.26",
-    "polyline": "0.2.0"
+    "wellknown": "0.4.2"
   },
   "devDependencies": {
     "browserify": "13.0.1",

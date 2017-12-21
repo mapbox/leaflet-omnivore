@@ -51,6 +51,53 @@ test('gpx', function (t) {
     });
 });
 
+test('tcx-featureLayer', function (t) {
+    function customFilter() { return true; }
+    var l = L.mapbox.featureLayer();
+    var layer = omnivore.tcx('a.tcx', null, l);
+
+    t.ok('setFilter' in layer, 'uses a featureLayer');
+    layer.on('ready', function() {
+        t.pass('fires ready event');
+        t.ok('setFilter' in layer, 'uses a featureLayer');
+        t.end();
+    });
+    layer.on('error', function() {
+        t.fail('does not fire error event');
+        t.end();
+    });
+});
+
+test('tcx-customLayer', function (t) {
+    function customFilter() { return true; }
+    var l = L.geoJson(null, {
+        filter: customFilter
+    });
+    var layer = omnivore.tcx('a.tcx', null, l);
+    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
+    layer.on('ready', function() {
+        t.pass('fires ready event');
+        t.equal(layer.options.filter, customFilter, 'uses a customLayer');
+        t.end();
+    });
+    layer.on('error', function() {
+        t.fail('does not fire error event');
+        t.end();
+    });
+});
+
+test('tcx', function (t) {
+    t.plan(2);
+    var layer = omnivore.tcx('a.tcx');
+    t.ok(layer instanceof L.GeoJSON, 'produces geojson layer');
+    layer.on('ready', function() {
+        t.pass('fires ready event');
+    });
+    layer.on('error', function() {
+        t.fail('does not fire error event');
+    });
+});
+
 test('polyline.parse', function (t) {
     t.plan(2);
     var layer = omnivore.polyline.parse(fs.readFileSync('./test/a.polyline', 'utf8'));
