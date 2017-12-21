@@ -3,7 +3,8 @@ var xhr = require('corslite'),
     wellknown = require('wellknown'),
     polyline = require('polyline'),
     topojson = require('topojson'),
-    toGeoJSON = require('togeojson');
+    toGeoJSON = require('togeojson'),
+    parsetcxdom = require('tcx');
 
 module.exports.polyline = polylineLoad;
 module.exports.polyline.parse = polylineParse;
@@ -24,6 +25,9 @@ module.exports.kml.parse = kmlParse;
 
 module.exports.wkt = wktLoad;
 module.exports.wkt.parse = wktParse;
+
+module.exports.tcx = tcxLoad;
+module.exports.tcx.parse = tcxParse;
 
 function addData(l, d) {
     if ('setGeoJSON' in l) {
@@ -114,6 +118,31 @@ function gpxLoad(url, options, customLayer) {
         }
         layer.on('error', avoidReady);
         gpxParse(response.responseXML || response.responseText, options, layer);
+        layer.off('error', avoidReady);
+        if (!error) layer.fire('ready');
+    }
+    return layer;
+}
+
+/**
+ * Load a TCX document into a layer and return the layer.
+ *
+ * @param {string} url
+ * @param {object} options
+ * @param {object} customLayer
+ * @returns {object}
+ */
+function tcxLoad(url, options, customLayer) {
+    var layer = customLayer || L.geoJson();
+    xhr(url, onload);
+    function onload(err, response) {
+        var error;
+        if (err) return layer.fire('error', { error: err });
+        function avoidReady() {
+            error = true;
+        }
+        layer.on('error', avoidReady);
+        tcxParse(response.responseXML || response.responseText, options, layer);
         layer.off('error', avoidReady);
         if (!error) layer.fire('ready');
     }
@@ -217,6 +246,16 @@ function gpxParse(gpx, options, layer) {
     return layer;
 }
 
+function tcxParse(gpx, options, layer) {
+    var xml = parseXML(gpx);
+    if (!xml) return layer.fire('error', {
+        error: 'Could not parse TCX'
+    });
+    layer = layer || L.geoJson();
+    var geojson = parsetcxdom(xml);
+    addData(layer, geojson);
+    return layer;
+}
 
 function kmlParse(gpx, options, layer) {
     var xml = parseXML(gpx);

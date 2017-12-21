@@ -9,6 +9,7 @@ It currently supports:
 
 * [CSV](http://en.wikipedia.org/wiki/Comma-separated_values) (via [csv2geojson](https://github.com/mapbox/csv2geojson))
 * GPX (via [toGeoJSON](https://github.com/mapbox/togeojson))
+* TCX (via [tcx](https://github.com/mapbox/tcx))
 * [KML](http://developers.google.com/kml/documentation/) (via [toGeoJSON](https://github.com/mapbox/togeojson))
 * [WKT](http://en.wikipedia.org/wiki/Well-known_text) (via [wellknown](https://github.com/mapbox/wellknown))
 * [TopoJSON](https://github.com/mbostock/topojson)
@@ -24,7 +25,6 @@ use it easily with the [Mapbox Plugins CDN](http://mapbox.com/mapbox.js/plugins/
 ```html
 <script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.3.1/leaflet-omnivore.min.js'></script>
 ```
-
 
 Or download `leaflet-omnivore.min.js` from this repository.
 
@@ -46,6 +46,7 @@ var map = L.mapbox.map('map', 'mapbox.streets')
 
 omnivore.csv('a.csv').addTo(map);
 omnivore.gpx('a.gpx').addTo(map);
+omnivore.tcx('a.tcx').addTo(map);
 omnivore.kml('a.kml').addTo(map);
 omnivore.wkt('a.wkt').addTo(map);
 omnivore.topojson('a.topojson').addTo(map);
@@ -72,6 +73,8 @@ You can also use this API to pass custom options to a `L.geoJson()` instance.:
 * `.kml.parse(kmlString | gpxDom)`: Parse KML from a string of XML or XML DOM, and return layer.
 * `.gpx(url, parser_options?, customLayer?)`: Load & parse GPX, and return layer.
 * `.gpx.parse(gpxString | gpxDom)`: Parse GPX from a string of XML or XML DOM, and return layer.
+* `.tcx(url, parser_options?, customLayer?)`: Load & parse GPX, and return layer.
+* `.tcx.parse(gpxString | gpxDom)`: Parse GPX from a string of XML or XML DOM, and return layer.
 * `.geojson(url, parser_options?, customLayer?)`: Load GeoJSON file at URL, parse GeoJSON, and return layer.
 * `.wkt(url, parser_options?, customLayer?)`: Load & parse WKT, and return layer.
 * `.wkt.parse(wktString)`: Parse WKT, and return layer.
@@ -170,12 +173,24 @@ from `index.js` by `browserify`. If you find an issue, it either needs to be
 fixed in `index.js`, or in one of the libraries leaflet-omnivore uses
 to parse formats.
 
+### Demo File
+
+A live demo file is available in `test/demo.html` which you can quickly preview
+by running:
+
+```sh
+npm install -g http-server
+http-server .
+```
+
+And then opening http://localhost:8080/test/demo.html
+
 ## FAQ
 
 * **What if I just want one format?** Lucky for you, each format is specified
   in a different module, so you can just use [TopoJSON](https://github.com/mbostock/topojson),
-  [csv2geojson](https://github.com/mapbox/csv2geojson), [wellknown](https://github.com/mapbox/wellknown), or
-  [toGeoJSON](https://github.com/mapbox/togeojson)
+  [csv2geojson](https://github.com/mapbox/csv2geojson), [wellknown](https://github.com/mapbox/wellknown),
+  [toGeoJSON](https://github.com/mapbox/togeojson), or [tcx](https://github.com/mapbox/tcx)
   individually.
 * **My AJAX request is failing for a cross-domain request**. Read up on the [Same Origin Restriction](http://en.wikipedia.org/wiki/Same-origin_policy).
   By default, we use corslite, so cross-domain requests will try to use [CORS](http://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
