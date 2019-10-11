@@ -1,7 +1,7 @@
 /*!
- * maptalks.formats v0.2.0
+ * maptalks.formats v0.3.0
  * LICENSE : BSD-3-Clause
- * (c) 2016-2017 maptalks.org
+ * (c) 2016-2019 maptalks.org
  */
 /*!
  * requires maptalks@^0.25.0 
@@ -177,31 +177,29 @@ var format_1 = format;
 var formatPair_1 = formatPair;
 var coordToDMS_1 = coordToDMS;
 
-function element(x, dims) {
-  return search(x, dims).val;
+function element(input, dims) {
+  var result = search(input, dims);
+  return result === null ? null : result.val;
 }
 
-function formatPair(x) {
-  return format(x.lat, 'lat') + ' ' + format(x.lon, 'lon');
+function formatPair(input) {
+  return format(input.lat, 'lat') + ' ' + format(input.lon, 'lon');
 }
 
-function format(x, dim) {
-  var dms = coordToDMS(x, dim);
+function format(input, dim) {
+  var dms = coordToDMS(input, dim);
   return dms.whole + '° ' + (dms.minutes ? dms.minutes + '\' ' : '') + (dms.seconds ? dms.seconds + '" ' : '') + dms.dir;
 }
 
-function coordToDMS(x, dim) {
-  var dirs = {
-    lat: ['N', 'S'],
-    lon: ['E', 'W']
-  }[dim] || '',
-      dir = dirs[x >= 0 ? 0 : 1],
-      abs = Math.abs(x),
-      whole = Math.floor(abs),
-      fraction = abs - whole,
-      fractionMinutes = fraction * 60,
-      minutes = Math.floor(fractionMinutes),
-      seconds = Math.floor((fractionMinutes - minutes) * 60);
+function coordToDMS(input, dim) {
+  var dirs = { lat: ['N', 'S'], lon: ['E', 'W'] }[dim] || '';
+  var dir = dirs[input >= 0 ? 0 : 1];
+  var abs = Math.abs(input);
+  var whole = Math.floor(abs);
+  var fraction = abs - whole;
+  var fractionMinutes = fraction * 60;
+  var minutes = Math.floor(fractionMinutes);
+  var seconds = Math.floor((fractionMinutes - minutes) * 60);
 
   return {
     whole: whole,
@@ -211,27 +209,51 @@ function coordToDMS(x, dim) {
   };
 }
 
-function search(x, dims, r) {
+function search(input, dims) {
   if (!dims) dims = 'NSEW';
-  if (typeof x !== 'string') return { val: null, regex: r };
-  r = r || /[\s\,]*([\-|\—|\―]?[0-9.]+)°? *(?:([0-9.]+)['’′‘] *)?(?:([0-9.]+)(?:''|"|”|″) *)?([NSEW])?/gi;
-  var m = r.exec(x);
-  if (!m) return { val: null, regex: r };else if (m[4] && dims.indexOf(m[4]) === -1) return { val: null, regex: r };else return {
-    val: ((m[1] ? parseFloat(m[1]) : 0) + (m[2] ? parseFloat(m[2]) / 60 : 0) + (m[3] ? parseFloat(m[3]) / 3600 : 0)) * (m[4] && m[4] === 'S' || m[4] === 'W' ? -1 : 1),
-    regex: r,
-    raw: m[0],
-    dim: m[4]
+  if (typeof input !== 'string') return null;
+
+  input = input.toUpperCase();
+  var regex = /^[\s\,]*([NSEW])?\s*([\-|\—|\―]?[0-9.]+)[°º˚]?\s*(?:([0-9.]+)['’′‘]\s*)?(?:([0-9.]+)(?:''|"|”|″)\s*)?([NSEW])?/;
+
+  var m = input.match(regex);
+  if (!m) return null;
+
+  var matched = m[0];
+
+  var dim;
+  if (m[1] && m[5]) {
+    dim = m[1];
+    matched = matched.slice(0, -1);
+  } else {
+    dim = m[1] || m[5];
+  }
+
+  if (dim && dims.indexOf(dim) === -1) return null;
+
+  var deg = m[2] ? parseFloat(m[2]) : 0;
+  var min = m[3] ? parseFloat(m[3]) / 60 : 0;
+  var sec = m[4] ? parseFloat(m[4]) / 3600 : 0;
+  var sign = deg < 0 ? -1 : 1;
+  if (dim === 'S' || dim === 'W') sign *= -1;
+
+  return {
+    val: (Math.abs(deg) + min + sec) * sign,
+    dim: dim,
+    matched: matched,
+    remain: input.slice(matched.length)
   };
 }
 
-function pair(x, dims) {
-  x = x.trim();
-  var one = search(x, dims);
-  if (one.val === null) return null;
-  var two = search(x, dims, one.regex);
-  if (two.val === null) return null;
+function pair(input, dims) {
+  input = input.trim();
+  var one = search(input, dims);
+  if (!one) return null;
 
-  if (one.raw + two.raw !== x) return null;
+  input = one.remain.trim();
+  var two = search(input, dims);
+  if (!two || two.remain) return null;
+
   if (one.dim) {
     return swapdim(one.val, two.val, one.dim);
   } else {
@@ -393,7 +415,18 @@ function csv2geojson(x, options, callback) {
         }
     }
 
-    var parsed = typeof x == 'string' ? dsv.dsvFormat(options.delimiter).parse(x) : x;
+    var numericFields = options.numericFields ? options.numericFields.split(',') : null;
+
+    var parsed = typeof x == 'string' ? dsv.dsvFormat(options.delimiter).parse(x, function (d) {
+        if (numericFields) {
+            for (var key in d) {
+                if (numericFields.includes(key)) {
+                    d[key] = +d[key];
+                }
+            }
+        }
+        return d;
+    }) : x;
 
     if (!parsed.length) {
         callback(null, featurecollection);
@@ -3615,6 +3648,234 @@ var togeojson = createCommonjsModule(function (module, exports) {
     module.exports = toGeoJSON;
 });
 
+var osm2geojson = function osm2geojson(osm, metaProperties) {
+
+    var xml = parse(osm),
+        usedCoords = {},
+        nodeCache = cacheNodes(),
+        wayCache = cacheWays();
+
+    return Bounds({
+        type: 'FeatureCollection',
+        features: [].concat(Ways(wayCache)).concat(Ways(Relations)).concat(Points(nodeCache))
+    }, xml);
+
+    function parse(xml) {
+        if (typeof xml !== 'string') return xml;
+        return new DOMParser().parseFromString(xml, 'text/xml');
+    }
+
+    function Bounds(geo, xml) {
+        var bounds = getBy(xml, 'bounds');
+        if (!bounds.length) return geo;
+        geo.bbox = [attrf(bounds[0], 'minlon'), attrf(bounds[0], 'minlat'), attrf(bounds[0], 'maxlon'), attrf(bounds[0], 'maxlat')];
+        return geo;
+    }
+
+    function setProperties(element) {
+        if (!element) return {};
+
+        var props = {},
+            tags = element.getElementsByTagName('tag'),
+            tags_length = tags.length;
+
+        for (var t = 0; t < tags_length; t++) {
+            props[attr(tags[t], 'k')] = isNumber(attr(tags[t], 'v')) ? parseFloat(attr(tags[t], 'v')) : attr(tags[t], 'v');
+        }
+
+        if (metaProperties) {
+            setIf(element, 'id', props, 'osm_id');
+            setIf(element, 'user', props, 'osm_lastEditor');
+            setIf(element, 'version', props, 'osm_version', true);
+            setIf(element, 'changeset', props, 'osm_lastChangeset', true);
+            setIf(element, 'timestamp', props, 'osm_lastEdited');
+        }
+
+        return sortObject(props);
+    }
+
+    function getFeature(element, type, coordinates) {
+        return {
+            geometry: {
+                type: type,
+                coordinates: coordinates || []
+            },
+            type: 'Feature',
+            properties: setProperties(element)
+        };
+    }
+
+    function cacheNodes() {
+        var nodes = getBy(xml, 'node'),
+            coords = {};
+
+        for (var n = 0; n < nodes.length; n++) {
+            coords[attr(nodes[n], 'id')] = nodes[n];
+        }
+
+        return coords;
+    }
+
+    function Points(nodeCache) {
+        var points = nodeCache,
+            features = [];
+
+        for (var node in nodeCache) {
+            var tags = getBy(nodeCache[node], 'tag');
+            if (!usedCoords[node] || tags.length) features.push(getFeature(nodeCache[node], 'Point', lonLat(nodeCache[node])));
+        }
+
+        return features;
+    }
+
+    function cacheWays() {
+        var ways = getBy(xml, 'way'),
+            out = {};
+
+        for (var w = 0; w < ways.length; w++) {
+            var feature = {},
+                nds = getBy(ways[w], 'nd');
+
+            if (attr(nds[0], 'ref') === attr(nds[nds.length - 1], 'ref')) {
+                feature = getFeature(ways[w], 'Polygon', [[]]);
+            } else {
+                feature = getFeature(ways[w], 'LineString');
+            }
+
+            for (var n = 0; n < nds.length; n++) {
+                var node = nodeCache[attr(nds[n], 'ref')];
+                if (node) {
+                    var cords = lonLat(node);
+                    usedCoords[attr(nds[n], 'ref')] = true;
+                    if (feature.geometry.type === 'Polygon') {
+                        feature.geometry.coordinates[0].push(cords);
+                    } else {
+                        feature.geometry.coordinates.push(cords);
+                    }
+                }
+            }
+
+            out[attr(ways[w], 'id')] = feature;
+        }
+
+        return out;
+    }
+
+    function Relations() {
+        var relations = getBy(xml, 'relation'),
+            relations_length = relations.length,
+            features = [];
+
+        for (var r = 0; r < relations_length; r++) {
+            var feature = getFeature(relations[r], 'MultiPolygon');
+
+            if (feature.properties.type == 'multipolygon') {
+                var members = getBy(relations[r], 'member');
+
+                for (var m = 0; m < members.length; m++) {
+                    if (attr(members[m], 'role') == 'outer') assignWay(members[m], feature);
+                }
+
+                for (var n = 0; n < members.length; n++) {
+                    if (attr(members[n], 'role') == 'inner') assignWay(members[n], feature);
+                }
+
+                delete feature.properties.type;
+            } else {}
+
+            if (feature.geometry.coordinates.length) features.push(feature);
+        }
+
+        return features;
+
+        function assignWay(member, feature) {
+            var ref = attr(member, 'ref'),
+                way = wayCache[ref];
+
+            if (way && way.geometry.type == 'Polygon') {
+                if (way && attr(member, 'role') == 'outer') {
+                    feature.geometry.coordinates.push(way.geometry.coordinates);
+                    if (way.properties) {
+                        for (var prop in way.properties) {
+                            if (!feature.properties[prop]) {
+                                feature.properties[prop] = prop;
+                            }
+                        }
+                    }
+                } else if (way && attr(member, 'role') == 'inner') {
+                    if (feature.geometry.coordinates.length > 1) {
+                        for (var a = 0; a < feature.geometry.coordinates.length; a++) {
+                            if (pointInPolygon(way.geometry.coordinates[0][0], feature.geometry.coordinates[a][0])) {
+                                feature.geometry.coordinates[a].push(way.geometry.coordinates[0]);
+                                break;
+                            }
+                        }
+                    } else {
+                        if (feature.geometry.coordinates.length) {
+                            feature.geometry.coordinates[0].push(way.geometry.coordinates[0]);
+                        }
+                    }
+                }
+            }
+
+            wayCache[ref] = false;
+        }
+    }
+
+    function Ways(wayCache) {
+        var features = [];
+        for (var w in wayCache) {
+            if (wayCache[w]) features.push(wayCache[w]);
+        }return features;
+    }
+
+    function pointInPolygon(point, vs) {
+        var x = point[0],
+            y = point[1];
+        var inside = false;
+        for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+            var xi = vs[i][0],
+                yi = vs[i][1],
+                xj = vs[j][0],
+                yj = vs[j][1],
+                intersect = yi > y != yj > y && x < (xj - xi) * (y - yi) / (yj - yi) + xi;
+            if (intersect) inside = !inside;
+        }
+        return inside;
+    }
+
+    function sortObject(o) {
+        var sorted = {},
+            key,
+            a = [];
+        for (key in o) {
+            if (o.hasOwnProperty(key)) a.push(key);
+        }a.sort();
+        for (key = 0; key < a.length; key++) {
+            sorted[a[key]] = o[a[key]];
+        }return sorted;
+    }
+
+    function isNumber(n) {
+        return !isNaN(parseFloat(n)) && isFinite(n);
+    }
+    function attr(x, y) {
+        return x.getAttribute(y);
+    }
+    function attrf(x, y) {
+        return parseFloat(x.getAttribute(y));
+    }
+    function getBy(x, y) {
+        return x.getElementsByTagName(y);
+    }
+    function lonLat(elem) {
+        return [attrf(elem, 'lon'), attrf(elem, 'lat')];
+    }
+    function setIf(x, y, o, name, f) {
+        if (attr(x, y)) o[name] = f ? parseFloat(attr(x, y)) : attr(x, y);
+    }
+};
+
 var formats = {
     geojson: geojsonLoad,
     topojson: topojsonLoad,
@@ -3622,7 +3883,8 @@ var formats = {
     gpx: gpxLoad,
     kml: kmlLoad,
     wkt: wktLoad,
-    polyline: polylineLoad
+    polyline: polylineLoad,
+    osm: osmLoad
 };
 
 function geojsonLoad(url, cb) {
@@ -3716,6 +3978,18 @@ function wktLoad(url, cb) {
 
 wktLoad.parse = wktParse;
 
+function osmLoad(url, cb) {
+    maptalks.Ajax.get(url, function (err, response) {
+        if (err) {
+            cb(err);
+            return;
+        }
+        var geojson = osm2geojson(response);
+        cb(null, geojson);
+    });
+    return this;
+}
+
 function polylineLoad(url, options, cb) {
     maptalks.Ajax.get(url, function (err, response) {
         if (err) {
@@ -3798,6 +4072,6 @@ exports.Formats = formats;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-typeof console !== 'undefined' && console.log('maptalks.formats v0.2.0, requires maptalks@^0.25.0.');
+typeof console !== 'undefined' && console.log('maptalks.formats v0.3.0, requires maptalks@^0.25.0.');
 
 })));

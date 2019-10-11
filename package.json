@@ -1,6 +1,6 @@
 {
   "name": "maptalks.formats",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A geospatial format parser for Maptalks",
   "module": "index.js",
   "main": "dist/maptalks.formats.js",
