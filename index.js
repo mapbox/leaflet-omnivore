@@ -4,15 +4,17 @@ import wellknown from 'wellknown';
 import polyline from '@mapbox/polyline';
 import { feature as topoFeature } from 'topojson';
 import toGeoJSON from '@mapbox/togeojson';
+import { osm2geojson } from './src/osm2geojson';
 
 const formats = {
-    geojson : geojsonLoad,
-    topojson : topojsonLoad,
-    csv : csvLoad,
-    gpx : gpxLoad,
-    kml : kmlLoad,
-    wkt : wktLoad,
-    polyline : polylineLoad
+    geojson: geojsonLoad,
+    topojson: topojsonLoad,
+    csv: csvLoad,
+    gpx: gpxLoad,
+    kml: kmlLoad,
+    wkt: wktLoad,
+    polyline: polylineLoad,
+    osm: osmLoad
 };
 
 export { formats as Formats };
@@ -143,6 +145,20 @@ function wktLoad(url, cb) {
 }
 
 wktLoad.parse = wktParse;
+
+
+
+function osmLoad(url, cb) {
+    maptalks.Ajax.get(url, (err, response) => {
+        if (err) {
+            cb(err);
+            return;
+        }
+        const geojson = osm2geojson(response);
+        cb(null, geojson);
+    });
+    return this;
+}
 
 /**
  * Load a polyline string into a layer and return the layer

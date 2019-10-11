@@ -125,6 +125,19 @@
                     map.fitExtent(layer.getExtent());
                 });
             }
+        },
+        {
+            item: 'osm',
+            click : function () {
+                maptalks.Formats.osm('../test/osm.osm', function (err, geojson) {
+                    if (err) {
+                        throw err;
+                    }
+                    map.removeLayer('osm');
+                    var layer = new maptalks.VectorLayer('osm', geojson).addTo(map);
+                    map.fitExtent(layer.getExtent());
+                });
+            }
         }
     ]
     }).addTo(map);
