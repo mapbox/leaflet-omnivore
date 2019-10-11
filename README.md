@@ -14,6 +14,7 @@ It currently supports:
 * [KML](http://developers.google.com/kml/documentation/) (via [toGeoJSON](https://github.com/mapbox/togeojson))
 * [WKT](http://en.wikipedia.org/wiki/Well-known_text) (via [wellknown](https://github.com/mapbox/wellknown))
 * [TopoJSON](https://github.com/mbostock/topojson)
+* [OSM](https://wiki.openstreetmap.org/wiki/OSM_file_formats)
 * [Encoded Polylines](https://developers.google.com/maps/documentation/utilities/polylinealgorithm) via [polyline](https://github.com/mapbox/polyline)
 
 
@@ -35,6 +36,7 @@ maptalks.Formats.csv('a.csv', function (err, geojson) { });
 maptalks.Formats.gpx('a.gpx', function (err, geojson) { });
 maptalks.Formats.kml('a.kml', function (err, geojson) { });
 maptalks.Formats.wkt('a.wkt', function (err, geojson) { });
+maptalks.Formats.osm('osm.osm', function (err, geojson) { });
 maptalks.Formats.topojson('a.topojson', function (err, geojson) { });
 maptalks.Formats.polyline('a.txt', function (err, geojson) { });
 ```
@@ -56,6 +58,7 @@ sent to the parser library:
 * `.wkt.parse(wktString)`: Parse WKT.
 * `.topojson(url, callback)`: Load & parse TopoJSON.
 * `.topojson.parse(topojson)`: Parse TopoJSON (given as a string or object).
+* `.osm(url, callback)`: Parse OSM & Converts OSM XML to GeoJSON.
 * `.polyline(url, parser_options?, callback)`: Load & parse polyline.
 * `.polyline.parse(txt, options)`: Parse polyline (given as a string or object).
 
