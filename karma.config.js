@@ -14,6 +14,10 @@ module.exports = {
         {
             pattern: 'test/options.csv',
             included: false
+        },
+        {
+            pattern: 'test/osm.osm',
+            included: false
         }
     ],
 

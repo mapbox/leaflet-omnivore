@@ -108,4 +108,14 @@ describe('maptalks.formats', function () {
             done();
         });
     });
+
+    it('osm', function (done) {
+        maptalks.Formats.osm('/base/test/osm.osm', function (err, data) {
+            if (err) {
+                throw err;
+            }
+            expect(data.features.length).to.be.ok();
+            done();
+        });
+    });
 });
