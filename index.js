@@ -226,6 +226,13 @@ function kmlParse(gpx, options, layer) {
     layer = layer || L.geoJson();
     var geojson = toGeoJSON.kml(xml);
     addData(layer, geojson);
+    layer.eachLayer(function (sublayer) {
+        if (sublayer.feature.geometry.type === 'LineString' && sublayer.feature.properties.stroke) {
+            sublayer.feature.properties.color = sublayer.feature.properties.stroke;
+            sublayer.feature.properties.stroke = true;
+            sublayer.setStyle(sublayer.feature.properties);
+        }
+    });
     return layer;
 }
 
