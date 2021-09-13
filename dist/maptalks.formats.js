@@ -1,7 +1,7 @@
 /*!
  * maptalks.formats v0.3.0
  * LICENSE : BSD-3-Clause
- * (c) 2016-2019 maptalks.org
+ * (c) 2016-2021 maptalks.org
  */
 /*!
  * requires maptalks@^0.25.0 
@@ -971,13 +971,13 @@ var reverse = function (array, n) {
   }
 };
 
-var feature = function (topology, o) {
+var topoFeature = function (topology, o) {
   return o.type === "GeometryCollection" ? { type: "FeatureCollection", features: o.geometries.map(function (o) {
-      return feature$1(topology, o);
-    }) } : feature$1(topology, o);
+      return feature(topology, o);
+    }) } : feature(topology, o);
 };
 
-function feature$1(topology, o) {
+function feature(topology, o) {
   var id = o.id,
       bbox = o.bbox,
       properties = o.properties == null ? {} : o.properties,
@@ -1308,6 +1308,41 @@ function reverse$1(array, start, end) {
     t = array[start], array[start] = array[end], array[end] = t;
   }
 }
+
+var identity$1 = function (x) {
+  return x;
+};
+
+var transform$1 = function (transform) {
+  if (transform == null) return identity$1;
+  var x0,
+      y0,
+      kx = transform.scale[0],
+      ky = transform.scale[1],
+      dx = transform.translate[0],
+      dy = transform.translate[1];
+  return function (input, i) {
+    if (!i) x0 = y0 = 0;
+    var j = 2,
+        n = input.length,
+        output = new Array(n);
+    output[0] = (x0 += input[0]) * kx + dx;
+    output[1] = (y0 += input[1]) * ky + dy;
+    while (j < n) {
+      output[j] = input[j], ++j;
+    }return output;
+  };
+};
+
+var bisect$1 = function (a, x) {
+  var lo = 0,
+      hi = a.length;
+  while (lo < hi) {
+    var mid = lo + hi >>> 1;
+    if (a[mid] < x) lo = mid + 1;else hi = mid;
+  }
+  return lo;
+};
 
 var nameStartChar = /[A-Z_a-z\xC0-\xD6\xD8-\xF6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]/;
 var nameChar = new RegExp("[\\-\\.0-9" + nameStartChar.source.slice(1, -1) + "\\u00B7\\u0300-\\u036F\\u203F-\\u2040]");
@@ -4012,7 +4047,7 @@ function topojsonParse(data) {
     var json = [];
     var o = typeof data === 'string' ? JSON.parse(data) : data;
     for (var i in o.objects) {
-        var ft = feature(o, o.objects[i]);
+        var ft = topoFeature(o, o.objects[i]);
         if (ft.features) {
             maptalks.Util.pushIn(json, ft.features);
         } else {

@@ -6,27 +6,32 @@ const bundleHelper = new BundleHelper(pkg);
 const testHelper = new TestHelper();
 const karmaConfig = require('./karma.config');
 
-gulp.task('build', () => {
-    return bundleHelper.bundle('index.js');
+gulp.task('build', (done) => {
+    bundleHelper.bundle('index.js');
+    done();
 });
 
-gulp.task('minify', ['build'], () => {
+gulp.task('minify', gulp.series('build', (done) => {
     bundleHelper.minify();
-});
+    done();
+}));
 
-gulp.task('watch', ['build'], () => {
-    gulp.watch(['index.js', './gulpfile.js'], ['build']);
-});
+gulp.task('watch', gulp.series('build', (done) => {
+    gulp.watch(['index.js', './gulpfile.js'], gulp.series('build'));
+    done();
+}));
 
-gulp.task('test', ['build'], () => {
+gulp.task('test', gulp.series('build', (done) => {
     testHelper.test(karmaConfig);
-});
+    done();
+}));
 
-gulp.task('tdd', ['build'], () => {
+gulp.task('tdd', gulp.series('build', (done) => {
     karmaConfig.singleRun = false;
-    gulp.watch(['index.js'], ['test']);
+    gulp.watch(['index.js'], gulp.series('test'));
     testHelper.test(karmaConfig);
-});
+    done();
+}));
 
-gulp.task('default', ['watch']);
+gulp.task('default', gulp.series('watch'));
 
